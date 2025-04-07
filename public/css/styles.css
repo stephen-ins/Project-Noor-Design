@@ -75,20 +75,6 @@ h4,
   transition-duration: 300ms;
 }
 
-/* Rotation infinie du logo Noor Design */
-/* @keyframes logo-rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(180deg);
-  }
-} */
-
-/* .logo-rotate {
-  animation: logo-rotate 8s linear infinite;
-} */
-
 /* Styles supplémentaires spécifiques à la bijouterie */
 .product-card:hover img {
   transform: scale(1.05);
@@ -113,15 +99,21 @@ h4,
 }
 
 /* Animation pour le menu mobile */
-
 #mobile-menu {
   max-height: 0;
+  opacity: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out;
+  transition: max-height 0.6s cubic-bezier(0.215, 0.61, 0.355, 1),
+    opacity 0.3s ease, visibility 0.3s ease;
+  visibility: hidden;
+  will-change: max-height, opacity, visibility;
+  display: block !important;
 }
 
 #mobile-menu.open {
   max-height: 500px;
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Styles pour les buttons */
