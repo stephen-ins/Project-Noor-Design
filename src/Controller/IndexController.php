@@ -18,12 +18,30 @@ final class IndexController extends AbstractController
         ]);
     }
 
+    // route pour la page à propos
+    #[Route('/about_me', name: 'app_about_me')]
+    public function aboutMe(): Response
+    {
+        return $this->render('app/about_me.html.twig', [
+            'controller_name' => 'À propos',
+        ]);
+    }
+
     // route pour la page catalogue
     #[Route('/catalogue', name: 'app_catalogue')]
     public function catalogue(): Response
     {
         return $this->render('app/catalogue.html.twig', [
             'controller_name' => 'Catalogue',
+        ]);
+    }
+
+    // route pour la page carte cadeau
+    #[Route('/carte-cadeau', name: 'app_carte_cadeau')]
+    public function carteCadeau(): Response
+    {
+        return $this->render('app/carte_cadeau.html.twig', [
+            'controller_name' => 'Carte cadeau',
         ]);
     }
 
