@@ -234,7 +234,13 @@
 			</div>
 		</footer>
 
-		{% block javascripts %}{% endblock %}
+		{# SCRIPT MENU BURGER #}
+
+		{% block javascripts %}
+			<script src="{{ asset('js/menu-burger.js') }}"></script>
+			{% block page_javascripts %}{% endblock %}
+		{% endblock %}
+
 	</body>
 
 </html>
