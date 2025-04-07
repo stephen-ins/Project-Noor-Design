@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Noor Design | Catalogue
+{% endblock %}
+
+{# AFFICHAGE DE LA PAGE CATALOGUE GENERALE #}
+
+{% block content %}
+
+ <!-- Page Header -->
+    <div class="color-bg-header py-16">
+      <div class="container mx-auto px-6 text-center">
+        <h1 class="text-4xl font-semibold text-gray-800 mb-2">Catalogue</h1>
+        <p class="text-lg text-gray-600">
+          Découvrez ma collection exclusive de bijoux artisanaux
+        </p>
+      </div>
+    </div>
+
+    <!-- Catalogue Section -->
+    <div class="container mx-auto px-6 py-12">
+      <!-- Filters and Sorting -->
+      <div class="flex flex-col md:flex-row justify-between mb-10">
+        <!-- Filters -->
+        <div class="flex flex-wrap items-center gap-4 mb-6 md:mb-0">
+          <span class="text-gray-700 font-medium">Filtrer par :</span>
+          <div class="relative">
+            <select
+              class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm"
+            >
+              <option value="">Catégorie</option>
+              <option value="colliers">Colliers</option>
+              <option value="bracelets">Bracelets</option>
+              <option value="boucles-oreilles">Boucles d'oreilles</option>
+              <option value="bagues">Bagues</option>
+              <option value="Grigris">Grigris</option>
+            </select>
+          </div>
+          <div class="relative">
+            <select
+              class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm"
+            >
+              <option value="">Prix</option>
+              <option value="0-50">Moins de 50€</option>
+              <option value="50-100">50€ - 100€</option>
+              <option value="100-200">100€ - 200€</option>
+              <option value="200+">Plus de 200€</option>
+            </select>
+          </div>
+          <div class="relative">
+            <select
+              class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm"
+            >
+              <option value="">Matériaux</option>
+              <option value="or">Or</option>
+              <option value="argent">Argent</option>
+              <option value="pierres">Pierres précieuses</option>
+              <option value="perles">Perles</option>
+            </select>
+          </div>
+        </div>
+        <!-- Sorting -->
+        <div class="flex items-center">
+          <span class="text-gray-700 font-medium mr-3">Trier par :</span>
+          <select
+            class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm"
+          >
+            <option value="nouveautes">Nouveautés</option>
+            <option value="prix-asc">Prix croissant</option>
+            <option value="prix-desc">Prix décroissant</option>
+            <option value="populaires">Popularité</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+      >
+        <!-- Product 1 -->
+        <div
+          class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card"
+        >
+          <div class="overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1602173574767-37ac01994b2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+              alt="Bague Diamant"
+              class="w-full h-64 object-cover"
+            />
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-gray-800">
+              Bague Diamant Éternel
+            </h3>
+
+            <!-- Ref produit mesure conservatoire -->
+            <!-- <small class="text-gray-400 italic block mb-2 opacity-90"
+              >Réf: ND-B2025-01</small
+            > -->
+
+            <p class="text-gray-600 mt-2 text-sm">
+              Bague élégante en or blanc 18 carats avec diamant central.
+            </p>
+            <div class="mt-4 flex justify-between items-center">
+              <span class="text-gold font-bold">45 €</span>
+              <a href="{{ path('app_produit', {'id': 1}) }}" class="text-gold hover:underline"
+                >Voir détails</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-center mt-12">
+        <nav class="inline-flex rounded-md shadow">
+          <a
+            href="#"
+            class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-l-md"
+            >Précédent</a
+          >
+          <a href="#" class="py-2 px-4 bg-gold text-white border border-gold"
+            >1</a
+          >
+          <a
+            href="#"
+            class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >2</a
+          >
+          <a
+            href="#"
+            class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >3</a
+          >
+          <a
+            href="#"
+            class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-r-md"
+            >Suivant</a
+          >
+        </nav>
+      </div>
+    </div>
+
+{% endblock %}
