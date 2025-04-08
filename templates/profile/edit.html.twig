@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Noor Design | Modification du profil
+{% endblock %}
+
+{% block content %}
+	<!-- Section d'édition du profil -->
+	<div class="color-bg-header py-16">
+		<div class="container mx-auto px-6 text-center">
+			<h1 class="text-4xl font-semibold text-gray-800 mb-2">
+				Modifier mon profil
+			</h1>
+			<p class="text-lg text-gray-600">
+				Mettez à jour vos informations personnelles
+			</p>
+		</div>
+	</div>
+
+	<!-- Formulaire d'édition -->
+	<section class="container mx-auto px-6 py-12">
+		<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
+			{% for flash_message in app.flashes('success') %}
+				<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
+					<span class="block sm:inline">{{ flash_message }}</span>
+				</div>
+			{% endfor %}
+
+			{{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div>
+					<div class="mb-4">
+						{{ form_label(form.prenom, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.prenom) }}
+						{{ form_errors(form.prenom) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.nom, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.nom) }}
+						{{ form_errors(form.nom) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.email) }}
+						{{ form_errors(form.email) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.genre, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.genre) }}
+						{{ form_errors(form.genre) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.birthday, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.birthday) }}
+						{{ form_errors(form.birthday) }}
+					</div>
+				</div>
+
+				<div>
+					<div class="mb-4">
+						{{ form_label(form.adresse, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.adresse) }}
+						{{ form_errors(form.adresse) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.ville, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.ville) }}
+						{{ form_errors(form.ville) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.zipcode, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.zipcode) }}
+						{{ form_errors(form.zipcode) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.pays, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.pays) }}
+						{{ form_errors(form.pays) }}
+					</div>
+
+					<div class="mb-4">
+						{{ form_label(form.phone, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(form.phone) }}
+						{{ form_errors(form.phone) }}
+					</div>
+				</div>
+			</div>
+
+			<div class="flex justify-between mt-8">
+				<a href="{{ path('app_profile') }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gold">
+					Retour au profil
+				</a>
+				<button type="submit" class="px-6 py-2 bg-gold text-white rounded-md hover:bg-gold-dark transition focus:outline-none focus:ring-2 focus:ring-gold focus:ring-opacity-50">
+					Enregistrer les modifications
+				</button>
+			</div>
+			{{ form_end(form) }}
+		</div>
+	</section>
+{% endblock %}

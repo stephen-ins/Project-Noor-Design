@@ -4,6 +4,6 @@ namespace App\Enum;
 
 enum Genre: string
 {
-    case HOMME = 'homme';
-    case FEMME = 'femme';
+    case HOMME = 'Homme';
+    case FEMME = 'Femme';
 }
