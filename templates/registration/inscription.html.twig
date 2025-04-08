@@ -7,315 +7,185 @@
 
 {% block content  %}
 
-    <!-- Page Header -->
-    <div class="color-bg-header py-16">
-      <div class="container mx-auto px-6 text-center">
-        <h1 class="text-4xl font-semibold text-gray-800 mb-2">
-          Bienvenue chez Noor Design
-        </h1>
-        <p class="text-lg text-gray-600">Créer mon compte client</p>
-      </div>
-    </div>
+	<!-- Page Header -->
+	<div class="color-bg-header py-16">
+		<div class="container mx-auto px-6 text-center">
+			<h1 class="text-4xl font-semibold text-gray-800 mb-2">
+				Bienvenue chez Noor Design
+			</h1>
+			<p class="text-lg text-gray-600">Créer mon compte client</p>
+		</div>
+	</div>
 
-    <!-- Création compte Section -->
-    <section class="container mx-auto px-6 py-12">
-      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          Créer un compte
-        </h2>
-        <p class="text-sm text-gray-600 mb-8">
-          Les champs marqués d'un astérisque (*) sont obligatoires.
-        </p>
-        <form class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label
-                for="firstname"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Prénom *</label
-              >
-              <input
-                type="text"
-                id="firstname"
-                name="firstname"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-                placeholder="Votre prénom"
-              />
-            </div>
-            <div>
-              <label
-                for="lastname"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Nom *</label
-              >
-              <input
-                type="text"
-                id="lastname"
-                name="lastname"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-                placeholder="Votre nom"
-              />
-            </div>
-          </div>
+	<!-- Création compte Section -->
+	<section class="container mx-auto px-6 py-12">
+		<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+			<h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+				Créer un compte
+			</h2>
+			<p class="text-sm text-gray-600 mb-8">
+				Les champs marqués d'un astérisque (*) sont obligatoires.
+			</p>
 
-          <div>
-            <label
-              for="email"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Email *</label
-            >
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-              placeholder="votre@email.com"
-            />
-          </div>
+			{% if app.flashes('error') is defined %}
+				{% for message in app.flashes('error') %}
+					<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+						<span class="block sm:inline">{{ message }}</span>
+					</div>
+				{% endfor %}
+			{% endif %}
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label
-                for="birthdate"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Date de naissance *</label
-              >
-              <input
-                type="date"
-                id="birthdate"
-                name="birthdate"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-              />
-            </div>
+			{{ form_start(registrationForm, {'attr': {'class': 'space-y-6'}}) }}
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div>
+					{{ form_label(registrationForm.prenom, 'Prénom *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(registrationForm.prenom, {'attr': {
+							'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+							'placeholder': 'Votre prénom'
+						}}) }}
+					{{ form_errors(registrationForm.prenom) }}
+				</div>
+				<div>
+					{{ form_label(registrationForm.nom, 'Nom *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(registrationForm.nom, {'attr': {
+							'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+							'placeholder': 'Votre nom'
+						}}) }}
+					{{ form_errors(registrationForm.nom) }}
+				</div>
+			</div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Genre *</label
-              >
-              <div class="flex space-x-6 mt-2">
-                <div class="flex items-center">
-                  <input
-                    type="radio"
-                    id="gender_m"
-                    name="gender"
-                    value="M"
-                    required
-                    class="mr-2 focus:ring-2 focus:ring-gold"
-                  />
-                  <label for="gender_m" class="text-sm text-gray-600"
-                    >Masculin</label
-                  >
-                </div>
-                <div class="flex items-center">
-                  <input
-                    type="radio"
-                    id="gender_f"
-                    name="gender"
-                    value="F"
-                    required
-                    class="mr-2 focus:ring-2 focus:ring-gold"
-                  />
-                  <label for="gender_f" class="text-sm text-gray-600"
-                    >Féminin</label
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
+			<div>
+				{{ form_label(registrationForm.email, 'Email *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+				{{ form_widget(registrationForm.email, {'attr': {
+						'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+						'placeholder': 'votre@email.com'
+					}}) }}
+				{{ form_errors(registrationForm.email) }}
+			</div>
 
-          <div>
-            <label
-              for="address"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Adresse *</label
-            >
-            <input
-              type="text"
-              id="address"
-              name="address"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-              placeholder="Votre adresse complète"
-            />
-          </div>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div>
+					{{ form_label(registrationForm.birthday, 'Date de naissance *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(registrationForm.birthday, {'attr': {
+							'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold'
+						}}) }}
+					{{ form_errors(registrationForm.birthday) }}
+				</div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label
-                for="postal_code"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Code postal *</label
-              >
-              <input
-                type="text"
-                id="postal_code"
-                name="postal_code"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-                placeholder="Votre code postal"
-              />
-            </div>
+				<div>
+					{{ form_label(registrationForm.genre, 'Genre *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					<div class="mt-2">
+						{% for child in registrationForm.genre %}
+							<div class="flex items-center mb-2">
+								{{ form_widget(child, {'attr': {'class': 'mr-2 focus:ring-2 focus:ring-gold'}}) }}
+								{{ form_label(child, null, {'label_attr': {'class': 'text-gray-700'}}) }}
+							</div>
+						{% endfor %}
+					</div>
+					{{ form_errors(registrationForm.genre) }}
+				</div>
+			</div>
 
-            <div>
-              <label
-                for="city"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Ville *</label
-              >
-              <input
-                type="text"
-                id="city"
-                name="city"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-                placeholder="Votre ville"
-              />
-            </div>
-          </div>
+			<div>
+				{{ form_label(registrationForm.adresse, 'Adresse *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+				{{ form_widget(registrationForm.adresse, {'attr': {
+						'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+						'placeholder': 'Votre adresse complète'
+					}}) }}
+				{{ form_errors(registrationForm.adresse) }}
+			</div>
 
-          <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
-            <div>
-              <label
-                for="country"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Pays *</label
-              >
-              <input
-                type="text"
-                id="country"
-                name="country"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-                placeholder="Votre pays"
-              />
-            </div>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div>
+					{{ form_label(registrationForm.zipcode, 'Code postal *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(registrationForm.zipcode, {'attr': {
+							'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+							'placeholder': 'Votre code postal'
+						}}) }}
+					{{ form_errors(registrationForm.zipcode) }}
+				</div>
 
-            <!-- <div>
-              <label
-                for="region"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Région *</label
-              >
-              <input
-                type="text"
-                id="region"
-                name="region"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-                placeholder="Votre région ou province"
-              />
-            </div> -->
-          </div>
+				<div>
+					{{ form_label(registrationForm.ville, 'Ville *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(registrationForm.ville, {'attr': {
+							'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+							'placeholder': 'Votre ville'
+						}}) }}
+					{{ form_errors(registrationForm.ville) }}
+				</div>
+			</div>
 
-          <div>
-            <label
-              for="phone"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Téléphone *</label
-            >
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-              placeholder="Votre numéro de téléphone"
-            />
-          </div>
+			<div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+				<div>
+					{{ form_label(registrationForm.pays, 'Pays *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(registrationForm.pays, {'attr': {
+							'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+							'placeholder': 'Votre pays'
+						}}) }}
+					{{ form_errors(registrationForm.pays) }}
+				</div>
+			</div>
 
-          <div>
-            <label
-              for="password"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Mot de passe *</label
-            >
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-              placeholder="Choisissez un mot de passe"
-            />
-            <p class="text-xs text-gray-500 mt-1">
-              Minimum 8 caractères, avec au moins une majuscule, une minuscule
-              et un chiffre
-            </p>
-          </div>
+			<div>
+				{{ form_label(registrationForm.phone, 'Téléphone *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+				{{ form_widget(registrationForm.phone, {'attr': {
+						'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+						'placeholder': 'Votre numéro de téléphone'
+					}}) }}
+				{{ form_errors(registrationForm.phone) }}
+			</div>
 
-          <div>
-            <label
-              for="password_confirm"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Confirmation du mot de passe *</label
-            >
-            <input
-              type="password"
-              id="password_confirm"
-              name="password_confirm"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-              placeholder="Confirmez votre mot de passe"
-            />
-          </div>
+			<div>
+				{{ form_label(registrationForm.password.first, 'Mot de passe *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+				{{ form_widget(registrationForm.password.first, {'attr': {
+						'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+						'placeholder': 'Choisissez un mot de passe'
+					}}) }}
+				{{ form_errors(registrationForm.password.first) }}
+				<p class="text-xs text-gray-500 mt-1">
+					Minimum 8 caractères, avec au moins une majuscule, une minuscule,
+																															un chiffre et un caractère spécial
+				</p>
+			</div>
 
-          <div class="space-y-4">
-            <!-- Mesure conservatoire Newletter --- Reflexion de ma cliente pour la mise en place -->
-            <!-- <div class="flex items-start">
-              <input
-                type="checkbox"
-                id="newsletter"
-                name="newsletter"
-                class="mt-1 mr-2"
-              />
-              <label for="newsletter" class="text-sm text-gray-600">
-                Je souhaite recevoir des informations sur les nouveautés et les
-                offres exclusives
-              </label>
-            </div> -->
+			<div>
+				{{ form_label(registrationForm.password.second, 'Confirmation du mot de passe *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+				{{ form_widget(registrationForm.password.second, {'attr': {
+						'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold',
+						'placeholder': 'Confirmez votre mot de passe'
+					}}) }}
+				{{ form_errors(registrationForm.password.second) }}
+			</div>
 
-            <div class="mt-4 flex items-start">
-              <input
-                type="checkbox"
-                id="terms"
-                name="terms"
-                required
-                class="mt-1 mr-2"
-              />
-              <label for="terms" class="text-sm text-gray-600">
-                J'accepte les
-                <a href="#" class="text-gold hover:underline">C.G.V</a>
-                et la
-                <a href="#" class="text-gold hover:underline"
-                  >politique de confidentialité</a
-                >
-                *
-              </label>
-            </div>
-          </div>
+			<div class="space-y-4">
+				<div class="mt-4 flex items-start">
+					{{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'mt-1 mr-2'}}) }}
+					<label for="{{ registrationForm.agreeTerms.vars.id }}" class="text-sm text-gray-600">
+						J'accepte les
+						<a href="#" class="text-gold hover:underline">C.G.V</a>
+						et la
+						<a href="#" class="text-gold hover:underline">politique de confidentialité</a>
+						*
+					</label>
+				</div>
+				{{ form_errors(registrationForm.agreeTerms) }}
+			</div>
 
-          <div>
-            <button
-              type="submit"
-              class="w-full mt-4 py-3 bg-gold text-white rounded-md hover:bg-gold-dark transition focus:outline-none focus:ring-2 focus:ring-gold focus:ring-opacity-50"
-            >
-              Créer mon compte
-            </button>
-          </div>
+			<div>
+				<button type="submit" class="w-full mt-4 py-3 bg-gold text-white rounded-md hover:bg-gold-dark transition focus:outline-none focus:ring-2 focus:ring-gold focus:ring-opacity-50">
+					Créer mon compte
+				</button>
+			</div>
 
-          <div class="mt-8 pt-6 border-t border-gray-200 text-center">
-            <p class="text-gray-600">
-              J'ai déjà un compte ?
-              <a href="login.html" class="text-gold hover:underline"
-                >Je me connecte ici</a
-              >
-            </p>
-          </div>
-        </form>
-      </div>
-    </section>
+			<div class="mt-8 pt-6 border-t border-gray-200 text-center">
+				<p class="text-gray-600">
+					J'ai déjà un compte ?
+					<a href="{{ path('app_connexion') }}" class="text-gold hover:underline">Je me connecte ici</a>
+				</p>
+			</div>
+			{{ form_end(registrationForm) }}
+		</div>
+	</section>
 
 {% endblock %}
