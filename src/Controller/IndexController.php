@@ -54,39 +54,12 @@ final class IndexController extends AbstractController
         ]);
     }
 
-    // route pour la page panier
-    #[Route('/panier', name: 'app_panier')]
-    public function panier(): Response
-    {
-        return $this->render('app/panier.html.twig', [
-            'controller_name' => 'Panier',
-        ]);
-    }
-
     // route pour la page connexion
     #[Route('/connexion', name: 'app_connexion')]
     public function connexion(): Response
     {
         return $this->render('app/connexion.html.twig', [
             'controller_name' => 'Connexion',
-        ]);
-    }
-
-    // route pour la page inscription
-    #[Route('/inscription', name: 'app_inscription')]
-    public function inscription(): Response
-    {
-        return $this->render('app/inscription.html.twig', [
-            'controller_name' => 'Inscription',
-        ]);
-    }
-
-    // route pour la page profil
-    #[Route('/profil', name: 'app_profil')]
-    public function profil(): Response
-    {
-        return $this->render('app/profil.html.twig', [
-            'controller_name' => 'Profil',
         ]);
     }
 
