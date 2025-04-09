@@ -9,14 +9,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route('/profile')]
 final class ProfileController extends AbstractController
 {
     // route pour la page profil
     #[Route('', name: 'app_profile')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         // S'assurer que l'utilisateur est connecté
         $this->denyAccessUnlessGranted('ROLE_USER');
@@ -26,8 +25,8 @@ final class ProfileController extends AbstractController
 
         return $this->render('profile/profile.html.twig', [
             'user' => $user,
+            'request' => $request,
         ]);
-
     }
 
     // route pour modifier le profil
@@ -39,6 +38,7 @@ final class ProfileController extends AbstractController
 
         // Récupérer l'utilisateur connecté
         $user = $this->getUser();
+
 
         // Créer le formulaire d'édition de profil
         $form = $this->createForm(ProfileEditType::class, $user);
@@ -55,7 +55,6 @@ final class ProfileController extends AbstractController
             // Rediriger vers la page de profil
             return $this->redirectToRoute('app_profile');
         }
-
         return $this->render('profile/edit.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
