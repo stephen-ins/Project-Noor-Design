@@ -73,37 +73,37 @@ final class IndexController extends AbstractController
     }
 
     // route pour la page mentions légales
-    #[Route('/mentions-legales', name: 'app_mentions_legales')]
-    public function mentionsLegales(): Response
+    #[Route('/mentions', name: 'app_mentions')]
+    public function mentions(): Response
     {
-        return $this->render('app/mentions_legales.html.twig', [
+        return $this->render('app/mentions.html.twig', [
             'controller_name' => 'Mentions légales',
         ]);
     }
 
     // route pour la page politique de confidentialité
-    #[Route('/politique-de-confidentialite', name: 'app_politique_confidentialite')]
+    #[Route('/pdc', name: 'app_pdc')]
     public function politiqueConfidentialite(): Response
     {
-        return $this->render('app/politique_confidentialite.html.twig', [
+        return $this->render('app/pdc.html.twig', [
             'controller_name' => 'Politique de confidentialité',
         ]);
     }
 
     // route pour la page conditions générales de vente
-    #[Route('/conditions-generales-de-vente', name: 'app_conditions_generales_vente')]
+    #[Route('/cgv', name: 'app_cgv')]
     public function conditionsGeneralesVente(): Response
     {
-        return $this->render('app/conditions_generales_vente.html.twig', [
+        return $this->render('app/cgv.html.twig', [
             'controller_name' => 'Conditions générales de vente',
         ]);
     }
 
     // route pour la page politique de remboursement
-    #[Route('/politique-de-remboursement', name: 'app_politique_remboursement')]
+    #[Route('/premboursement', name: 'app_premboursement')]
     public function politiqueRemboursement(): Response
     {
-        return $this->render('app/politique_de_remboursement.html.twig', [
+        return $this->render('app/premboursement.html.twig', [
             'controller_name' => 'Politique de remboursement',
         ]);
     }

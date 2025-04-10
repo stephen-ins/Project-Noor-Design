@@ -13,9 +13,13 @@ final class SecurityController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
 
-
         // Rediriger si l'utilisateur est déjà connecté
         if ($this->getUser()) {
+
+            // Ajouter un message flash de succès
+            $this->addFlash('success', 'Connexion réussie.');
+
+            // Rediriger vers la page d'accueil
             return $this->redirectToRoute('app_home');
         }
 
@@ -35,7 +39,7 @@ final class SecurityController extends AbstractController
     public function logout(): void
     {
         // Cette méthode sera interceptée par le firewall de Symfony
-        // Vous ne devriez jamais atteindre ce code
+        // et ne sera jamais exécutée
         throw new \LogicException('Cette méthode peut être vide - elle ne sera jamais exécutée !');
     }
 }

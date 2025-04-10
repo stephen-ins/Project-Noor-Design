@@ -138,8 +138,8 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Date de naissance',
                 'constraints' => [
                     new LessThanOrEqual([
-                        'value' => '-13 years',
-                        'message' => 'Vous devez avoir au moins 13 ans pour vous inscrire.',
+                        'value' => '-18 years',
+                        'message' => 'Vous devez avoir au moins 18 ans pour vous inscrire.',
                     ]),
                 ],
             ])
