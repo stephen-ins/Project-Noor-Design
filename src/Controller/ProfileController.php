@@ -53,7 +53,7 @@ final class ProfileController extends AbstractController
                 $request->getSession()->invalidate();
 
                 // Ajouter un message flash de confirmation
-                $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
+                $this->addFlash('success', 'Votre compte a été supprimé avec succès. Nous sommes désolés de vous voir partir. Nous espérons vous revoir bientôt !');
                 return $this->redirectToRoute('app_home');
             } else {
                 $this->addFlash('error', 'Mot de passe incorrect. La suppression du compte a été annulée.');
