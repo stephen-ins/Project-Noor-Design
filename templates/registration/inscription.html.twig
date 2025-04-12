@@ -175,7 +175,7 @@
 				{{ form_errors(registrationForm.password.first) }}
 				<p class="text-ml text-gray-500 mt-1">
 					Minimum 8 caractères, avec au moins une majuscule, une minuscule,
-																	un chiffre et un caractère spécial (@$!#%*?&.,_-)
+																											un chiffre et un caractère spécial (@$!#%*?&.,_-)
 				</p>
 			</div>
 
@@ -193,9 +193,9 @@
 					{{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'mt-1 mr-2'}}) }}
 					<label for="{{ registrationForm.agreeTerms.vars.id }}" class="text-sm text-gray-600">
 						J'accepte les
-						<a href="#" class="text-gold hover:underline">C.G.V</a>
+						<a href="{{path('app_cgv')}}" class="text-gold hover:underline">C.G.V</a>
 						et la
-						<a href="#" class="text-gold hover:underline">politique de confidentialité</a>
+						<a href="{{path('app_pdc')}}" class="text-gold hover:underline">politique de confidentialité</a>
 						*
 					</label>
 				</div>
@@ -211,7 +211,7 @@
 			<div class="mt-8 pt-6 border-t border-gray-200 text-center">
 				<p class="text-gray-600">
 					J'ai déjà un compte ?
-					<a href="{{ path('app_connexion') }}" class="text-gold hover:underline">Je me connecte ici</a>
+					<a href="{{ path('app_login') }}" class="text-gold hover:underline">Je me connecte ici</a>
 				</p>
 			</div>
 			{{ form_end(registrationForm) }}
