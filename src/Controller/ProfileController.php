@@ -95,4 +95,69 @@ final class ProfileController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
+    // route pour modifier le mot de passe
+    #[Route('/password', name: 'app_profile_password', methods: ['POST'])]
+    public function updatePassword(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
+    {
+        // S'assurer que l'utilisateur est connecté
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        
+        // Vérifier le token CSRF
+        if (!$this->isCsrfTokenValid('update_password', $request->request->get('_csrf_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide. Veuillez réessayer.');
+            return $this->redirectToRoute('app_profile');
+        }
+        
+        // Récupérer les données du formulaire
+        $currentPassword = $request->request->get('current_password');
+        $newPassword = $request->request->get('new_password');
+        $confirmPassword = $request->request->get('confirm_password');
+        
+        // Vérifier que tous les champs sont remplis
+        if (!$currentPassword || !$newPassword || !$confirmPassword) {
+            $this->addFlash('error', 'Tous les champs doivent être remplis.');
+            return $this->redirectToRoute('app_profile');
+        }
+        
+        // Vérifier que le mot de passe actuel est correct
+        if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
+            $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
+            return $this->redirectToRoute('app_profile');
+        }
+        
+        // Vérifier que les deux nouveaux mots de passe correspondent
+        if ($newPassword !== $confirmPassword) {
+            $this->addFlash('error', 'Les nouveaux mots de passe ne correspondent pas.');
+            return $this->redirectToRoute('app_profile');
+        }
+        
+        // Vérifier que le nouveau mot de passe est différent de l'ancien
+        if ($currentPassword === $newPassword) {
+            $this->addFlash('error', 'Le nouveau mot de passe doit être différent de l\'ancien.');
+            return $this->redirectToRoute('app_profile');
+        }
+        
+        // Vérifier que le nouveau mot de passe respecte les critères de sécurité
+        $regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.,_\-])[A-Za-z\d@$!%*?&.,_\-]{8,}$/';
+        if (!preg_match($regex, $newPassword)) {
+            $this->addFlash('error', 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&.,_-).');
+            return $this->redirectToRoute('app_profile');
+        }
+        
+        // Hacher le nouveau mot de passe
+        $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+        $user->setPassword($hashedPassword);
+        
+        // Enregistrer en base de données
+        $entityManager->flush();
+        
+        // Ajouter un message flash de succès
+        $this->addFlash('success', 'Votre mot de passe a été mis à jour avec succès.');
+        
+        return $this->redirectToRoute('app_profile');
+    }
 };
