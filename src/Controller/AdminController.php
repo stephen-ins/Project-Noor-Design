@@ -17,18 +17,45 @@ final class AdminController extends AbstractController
     #[Route('', name: 'index')]
     public function index(): Response
     {
-        return $this->render('admin/admin.html.twig', [
+        return $this->render('admin/admin.index.html.twig', [
             'controller_name' => 'AdminController',
         ]);
     }
 
-    // route pour la gestion des utilisateurs
+    // route pour la gestion des produits
+    #[Route('/products', name: 'products')]
+    public function products(): Response
+    {
+        return $this->render('admin/admin.products.html.twig', [
+            'controller_name' => 'AdminController',
+        ]);
+    }
+
+    // route pour la gestion des commandes
+    #[Route('/orders', name: 'orders')]
+    public function orders(): Response
+    {
+        return $this->render('admin/admin.orders.html.twig', [
+            'controller_name' => 'AdminController',
+        ]);
+    }
+
+    // route pour la gestion des catégories     
+    #[Route('/categories', name: 'categories')]
+    public function categories(): Response
+    {
+        return $this->render('admin/admin.categories.html.twig', [
+            'controller_name' => 'AdminController',
+        ]);
+    }
+
+    // route pour la gestion des clients
     #[Route('/users', name: 'users')]
     public function users(UsersRepository $usersRepository): Response
     {
         $users = $usersRepository->findAll();
 
-        return $this->render('admin/users.html.twig', [
+        return $this->render('admin/admin.users.html.twig', [
             'users' => $users,
         ]);
     }
@@ -62,5 +89,23 @@ final class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin_users', [], Response::HTTP_SEE_OTHER);
+    }
+
+    // route pour la gestion des commentaires
+    #[Route('/comments', name: 'comments')]
+    public function comments(): Response
+    {
+        return $this->render('admin/admin.comments.html.twig', [
+            'controller_name' => 'AdminController',
+        ]);
+    }
+
+    // route pour la gestion des messages boite de contact
+    #[Route('/messages', name: 'messages')]
+    public function messages(): Response
+    {
+        return $this->render('admin/admin.messages.html.twig', [
+            'controller_name' => 'AdminController',
+        ]);
     }
 }
