@@ -13,22 +13,52 @@
 		<!-- Header -->
 		<div class="flex justify-between items-center border-b pb-4 mb-6">
 			<h1 class="text-2xl font-semibold">Gestion des Catégories</h1>
-			<div class="relative" x-data="{ open: false }">
-				<button @click="open = !open" class="flex items-center border border-gray-300 rounded px-3 py-1 text-sm">
-					<i class="bi bi-person-circle mr-1"></i>
-					Admin
-					<i class="bi bi-chevron-down ml-1"></i>
-				</button>
-				<div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" style="display: none">
-					<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
-					<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
-					<hr class="my-1"/>
-					<a href="../index.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Déconnexion</a>
-				</div>
-			</div>
+			<button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded flex items-center shadow-sm transition duration-150 ease-in-out">
+				<i class="bi bi-plus mr-2"></i>
+				Ajouter une catégorie
+			</button>
 		</div>
 
+		<!-- Tableau des catégories -->
+		<div class="bg-white rounded-lg shadow-sm overflow-hidden">
+			<table class="w-full text-left">
+				<thead class="bg-gray-100 border-b">
+					<tr>
+						<th class="px-6 py-3">Image</th>
+						<th class="px-6 py-3">Nom du produit</th>
+						<th class="px-6 py-3">Catégorie</th>
+						<th class="px-6 py-3">Prix</th>
+						<th class="px-6 py-3">Stock</th>
+						<th class="px-6 py-3">Statut</th>
+						<th class="px-6 py-3">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Creation des catégories par tour de boucle -->
+					<tr class="border-b hover:bg-gray-50">
+						<td class="px-6 py-4">
+							<img src="https://via.placeholder.com/50" alt="Bague Diamond" class="w-12 h-12 object-cover rounded"/>
+						</td>
+						<td class="px-6 py-4 font-medium">Bague Diamond Elite</td>
+						<td class="px-6 py-4">Bagues</td>
+						<td class="px-6 py-4">599 €</td>
+						<td class="px-6 py-4">12</td>
+						<td class="px-6 py-4">
+							<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">En stock</span>
+						</td>
+						<td class="px-6 py-4">
+							<div class="flex space-x-2">
+								<button class="text-blue-600 hover:text-blue-800">
+									<i class="bi bi-pencil"></i>
+								</button>
+								<button class="text-red-600 hover:text-red-800">
+									<i class="bi bi-trash"></i>
+								</button>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</main>
 
-	</main>
-
-{% endblock %}
+	{% endblock %}
