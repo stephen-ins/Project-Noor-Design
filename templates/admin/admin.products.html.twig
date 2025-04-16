@@ -6,29 +6,337 @@
 {# AFFICHAGE DE LA PAGE ADMINISTRATION DU SITE --> PRODUITS #}
 
 {% block content %}
-
 	<!-- Main content -->
 	<main
 		class="flex-1 p-6">
 		<!-- Header -->
 		<div class="flex justify-between items-center border-b pb-4 mb-6">
 			<h1 class="text-2xl font-semibold">Gestion des Produits</h1>
-			<div class="relative" x-data="{ open: false }">
-				<button @click="open = !open" class="flex items-center border border-gray-300 rounded px-3 py-1 text-sm">
-					<i class="bi bi-person-circle mr-1"></i>
-					Admin
-					<i class="bi bi-chevron-down ml-1"></i>
+			<button id="openAddProductModal" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded flex items-center shadow-sm transition duration-150 ease-in-out">
+				<i class="bi bi-plus mr-2"></i>
+				Ajouter un produit
+			</button>
+		</div>
+
+		<!-- Filtre de recherche -->
+		<div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+			<div class="flex flex-wrap gap-4">
+				<div class="flex-1 min-w-[200px]">
+					<input type="text" placeholder="Rechercher un produit..." class="w-full px-4 py-2 border rounded"/>
+				</div>
+				<div class="w-40">
+					<select class="w-full px-4 py-2 border rounded">
+						<option value="">Catégorie</option>
+						<option value="bagues">Bagues</option>
+						<option value="boucles_d_oreilles">Boucles d'oreilles</option>
+						<option value="bracelets">Bracelets</option>
+						<option value="grigris_noor">Grigris Noor</option>
+						<option value="pochettes_bijoux">Pochettes à bijoux</option>
+					</select>
+				</div>
+				<div class="w-40">
+					<select class="w-full px-4 py-2 border rounded">
+						<option value="">Statut</option>
+						<option value="en_stock">En stock</option>
+						<option value="epuise">Épuisé</option>
+					</select>
+				</div>
+				<button class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
+					Filtrer
 				</button>
-				<div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" style="display: none">
-					<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
-					<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
-					<hr class="my-1"/>
-					<a href="../index.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Déconnexion</a>
+			</div>
+		</div>
+
+		<!-- Tableau des produits -->
+		<div class="bg-white rounded-lg shadow-sm overflow-hidden">
+			<table class="w-full text-left">
+				<thead class="bg-gray-100 border-b">
+					<tr>
+						<th class="px-6 py-3">Image</th>
+						<th class="px-6 py-3">Nom du produit</th>
+						<th class="px-6 py-3">Catégorie</th>
+						<th class="px-6 py-3">Description</th>
+						<th class="px-6 py-3">Matière</th>
+						<th class="px-6 py-3">Taille</th>
+						<th class="px-6 py-3">Poids</th>
+						<th class="px-6 py-3">Prix</th>
+						<th class="px-6 py-3">Statut</th>
+						<th class="px-6 py-3">Stock</th>
+						<th class="px-6 py-3">Date d'ajout</th>
+						<th class="px-6 py-3">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Creation des produits par tour de boucle -->
+					<tr class="border-b hover:bg-gray-50">
+						<td class="px-6 py-4">
+							<img src="https://via.placeholder.com/50" alt="Bague Diamond" class="w-12 h-12 object-cover rounded"/>
+						</td>
+						<td class="px-6 py-4 font-medium">Bague Diamond Elite</td>
+						<td class="px-6 py-4">Category</td>
+						<td class="px-6 py-4">Description</td>
+						<td class="px-6 py-4">Matière</td>
+						<td class="px-6 py-4">Taille</td>
+						<td class="px-6 py-4">Poids</td>
+						<td class="px-6 py-4">599 €</td>
+						<td class="px-6 py-4">
+							<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">En stock</span>
+						</td>
+						<td class="px-6 py-4">Stock</td>
+						<td class="px-6 py-4">21/06/2023</td>
+						<td class="px-6 py-4">
+							<div
+								class="flex space-x-2">
+
+								{# Ouverture de la modale de modification #}
+								<button class="text-blue-600 hover:text-blue-800">
+									<i class="bi bi-pencil"></i>
+								</button>
+
+								{# Suppression du produit sans modale #}
+								<button class="text-red-600 hover:text-red-800 ">
+									<i class="bi bi-trash"></i>
+								</button>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			{# Pagination du tableau #}
+			<div class="flex justify-between items-center border-t p-4 bg-gray-50">
+				<div class="text-sm text-gray-600">Affichage de 1 à 10 sur 50 produits</div>
+				<div class="flex space-x-2">
+					<button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Précédent</button>
+					<button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Suivant</button>
 				</div>
 			</div>
 		</div>
 
 
-	</main>
+		<!-- Modale -->
+		<div id="editProductModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-50">
+			<div class="bg-white rounded-lg shadow-lg w-4/5 h-4/5 mx-auto overflow-auto">
+				<div class="sticky top-0 bg-white border-b px-6 py-3 flex justify-between items-center">
+					<h3 class="text-xl font-semibold">Modifier le produit</h3>
+					<button id="closeEditModal" class="text-gray-500 hover:text-gray-700">
+						<i class="bi bi-x-lg"></i>
+					</button>
+				</div>
+				<div class="p-6">
+					<form id="editProductForm">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+							<div class="col-span-1 md:col-span-2">
+								<div class="mb-4 flex items-center">
+									<img id="previewImage" src="https://via.placeholder.com/100" class="w-24 h-24 object-cover rounded mr-4" alt="Aperçu du produit"/>
+									<div>
+										<label class="block text-sm font-medium text-gray-700 mb-1">Image du produit</label>
+										<input type="file" class="w-full text-sm" accept="image/*"/>
+									</div>
+								</div>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+								<input type="text" id="productName" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+								<select id="productCategory" class="w-full px-3 py-2 border rounded" required>
+									<option value="">Sélectionner une catégorie</option>
+									<option value="bagues">Bagues</option>
+									<option value="boucles_d_oreilles">Boucles d'oreilles</option>
+									<option value="bracelets">Bracelets</option>
+									<option value="grigris_noor">Grigris Noor</option>
+									<option value="pochettes_bijoux">Pochettes à bijoux</option>
+								</select>
+							</div>
+							<div class="col-span-1 md:col-span-2">
+								<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+								<textarea id="productDescription" rows="4" class="w-full px-3 py-2 border rounded"></textarea>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Matière</label>
+								<input type="text" id="productMaterial" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Taille</label>
+								<input type="text" id="productSize" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Poids</label>
+								<input type="text" id="productWeight" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+								<input type="number" id="productPrice" class="w-full px-3 py-2 border rounded" min="0" step="0.01" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+								<input type="number" id="productStock" class="w-full px-3 py-2 border rounded" min="0" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+								<select id="productStatus" class="w-full px-3 py-2 border rounded">
+									<option value="">Sélectionner un statut</option>
+									<option value="en_stock">En stock</option>
+									<option value="epuise">Épuisé</option>
+								</select>
+							</div>
+							<div class="hidden">
+								<label class="block text-sm font-medium text-gray-700 mb-1">Date d'ajout</label>
+								<input type="date" id="productDateAdded" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+						</div>
+						<div class="flex justify-end space-x-3 border-t pt-4 sticky bottom-0 bg-white">
+							<button type="button" id="cancelEdit" class="px-4 py-2 border rounded hover:bg-gray-100">
+								Annuler
+							</button>
+							<button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+								Enregistrer les modifications
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 
-{% endblock %}
+		<!-- Modale d'ajout de produit -->
+		<div id="addProductModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-50">
+			<div class="bg-white rounded-lg shadow-lg w-4/5 h-4/5 mx-auto overflow-auto">
+				<div class="sticky top-0 bg-white border-b px-6 py-3 flex justify-between items-center">
+					<h3 class="text-xl font-semibold">Ajouter un nouveau produit</h3>
+					<button id="closeAddModal" class="text-gray-500 hover:text-gray-700">
+						<i class="bi bi-x-lg"></i>
+					</button>
+				</div>
+				<div class="p-6">
+					<form id="addProductForm">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+							<div class="col-span-1 md:col-span-2">
+								<div class="mb-4 flex items-center">
+									<img id="newProductPreview" src="https://via.placeholder.com/100" class="w-24 h-24 object-cover rounded mr-4" alt="Aperçu du produit"/>
+									<div>
+										<label class="block text-sm font-medium text-gray-700 mb-1">Image du produit</label>
+										<input type="file" class="w-full text-sm" accept="image/*" id="newProductImage"/>
+									</div>
+								</div>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+								<input type="text" id="newProductName" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+								<select id="newProductCategory" class="w-full px-3 py-2 border rounded" required>
+									<option value="">Sélectionner une catégorie</option>
+									<option value="bagues">Bagues</option>
+									<option value="boucles_d_oreilles">Boucles d'oreilles</option>
+									<option value="bracelets">Bracelets</option>
+									<option value="grigris_noor">Grigris Noor</option>
+									<option value="pochettes_bijoux">Pochettes à bijoux</option>
+								</select>
+							</div>
+							<div class="col-span-1 md:col-span-2">
+								<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+								<textarea id="newProductDescription" rows="4" class="w-full px-3 py-2 border rounded"></textarea>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Matière</label>
+								<input type="text" id="newProductMaterial" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Taille</label>
+								<input type="text" id="newProductSize" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Poids</label>
+								<input type="text" id="newProductWeight" class="w-full px-3 py-2 border rounded" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+								<input type="number" id="newProductPrice" class="w-full px-3 py-2 border rounded" min="0" step="0.01" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+								<input type="number" id="newProductStock" class="w-full px-3 py-2 border rounded" min="0" required/>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+								<select id="newProductStatus" class="w-full px-3 py-2 border rounded">
+									<option value="en_stock">En stock</option>
+									<option value="epuise">Épuisé</option>
+								</select>
+							</div>
+						</div>
+						<div class="flex justify-end space-x-3 border-t pt-4 sticky bottom-0 bg-white">
+							<button type="button" id="cancelAdd" class="px-4 py-2 border rounded hover:bg-gray-100">
+								Annuler
+							</button>
+							<button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700">
+								Ajouter le produit
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</main>{% endblock %}{% block javascripts %}
+{{ parent() }}
+<script>
+	document.addEventListener('DOMContentLoaded', function () { // Récupération des éléments de la modale d'édition
+const modale = document.getElementById('editProductModal');
+const closeEditModal = document.getElementById('closeEditModal');
+const cancelEdit = document.getElementById('cancelEdit');
+const editButtons = document.querySelectorAll('.text-blue-600');
+// Récupération des éléments de la modale d'ajout
+const addModale = document.getElementById('addProductModal');
+const openAddProductModal = document.getElementById('openAddProductModal');
+const closeAddModal = document.getElementById('closeAddModal');
+const cancelAdd = document.getElementById('cancelAdd');
+
+// Ajouter un écouteur d'événement à chaque bouton d'édition (crayon)
+editButtons.forEach(button => {
+button.addEventListener('click', function () {
+modale.classList.remove('hidden');
+});
+});
+
+// Fermer la modale avec le bouton X
+if (closeEditModal) {
+closeEditModal.addEventListener('click', function () {
+modale.classList.add('hidden');
+});
+}
+
+// Fermer la modale avec le bouton Annuler
+if (cancelEdit) {
+cancelEdit.addEventListener('click', function () {
+modale.classList.add('hidden');
+});
+}
+
+// Ouvrir la modale d'ajout de produit
+if (openAddProductModal) {
+openAddProductModal.addEventListener('click', function () {
+addModale.classList.remove('hidden');
+});
+}
+
+// Fermer la modale d'ajout avec le bouton X
+if (closeAddModal) {
+closeAddModal.addEventListener('click', function () {
+addModale.classList.add('hidden');
+});
+}
+
+// Fermer la modale d'ajout avec le bouton Annuler
+if (cancelAdd) {
+cancelAdd.addEventListener('click', function () {
+addModale.classList.add('hidden');
+});
+}
+});
+</script>{% endblock %}

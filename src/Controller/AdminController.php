@@ -65,7 +65,10 @@ final class AdminController extends AbstractController
     public function editUser(Request $request, Users $user, EntityManagerInterface $entityManager): Response
     {
         if ($request->isMethod('POST')) {
-            $roles = $request->request->get('roles', []);
+            $roles = $request->request->all()['roles'] ?? [];
+            if (!is_array($roles)) {
+                $roles = [$roles];
+            }
             $user->setRoles($roles);
             $entityManager->flush();
 
