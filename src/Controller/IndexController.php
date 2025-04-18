@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Products;
+use App\Repository\ProductsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -29,10 +31,15 @@ final class IndexController extends AbstractController
 
     // route pour la page catalogue
     #[Route('/catalogue', name: 'app_catalogue')]
-    public function catalogue(): Response
+    public function catalogue(ProductsRepository $repoAllProducts): Response
     {
+        // Récupérer tous les produits de la base de données
+        $allProducts = $repoAllProducts->findAll();
+        dump($allProducts);
+
         return $this->render('app/catalogue.html.twig', [
             'controller_name' => 'Catalogue',
+            'allProducts' => $allProducts,
         ]);
     }
 
@@ -45,12 +52,24 @@ final class IndexController extends AbstractController
         ]);
     }
 
-    // route pour la page produit
-    #[Route('/produit', name: 'app_produit')]
-    public function produit(): Response
+    // route pour rediriger /produit vers le catalogue
+    #[Route('/produit', name: 'app_produit_redirect')]
+    public function produitRedirect(): Response
     {
+        return $this->redirectToRoute('app_catalogue');
+    }
+
+    // route pour la page produit en détail avec l'id du produit et la possibilité de l'ajouter au panier
+    #[Route('/produit/{id}', name: 'app_produit')]
+    public function produit(int $id, ProductsRepository $repo): Response
+    {
+        // Récupérer le produit par son ID
+        $detailProduit = $repo->find($id);
+        dump($detailProduit);
+
         return $this->render('app/produit.html.twig', [
             'controller_name' => 'Produit',
+            'detailProduit' => $detailProduit,
         ]);
     }
 

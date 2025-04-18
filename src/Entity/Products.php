@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\ProductsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ProductsRepository;
 
 #[ORM\Entity(repositoryClass: ProductsRepository::class)]
 class Products
@@ -44,6 +44,12 @@ class Products
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_ajout = null;
+
+    #[ORM\Column(type: Types::JSON)]
+    private array $additionalImages = [];
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $statut = null;
 
     public function getId(): ?int
     {
@@ -167,6 +173,30 @@ class Products
     public function setDateAjout(\DateTimeInterface $date_ajout): static
     {
         $this->date_ajout = $date_ajout;
+
+        return $this;
+    }
+
+    public function getAdditionalImages(): array
+    {
+        return $this->additionalImages;
+    }
+
+    public function setAdditionalImages(array $additionalImages): static
+    {
+        $this->additionalImages = $additionalImages;
+
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(?string $statut): static
+    {
+        $this->statut = $statut;
 
         return $this;
     }
