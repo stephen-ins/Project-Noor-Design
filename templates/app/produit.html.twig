@@ -16,7 +16,7 @@
 			</h1>
 			<p class="text-lg text-gray-600">
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Est,
-																																																																																				          possimus!
+																																																																																								          possimus!
 			</p>
 		</div>
 	</div>
@@ -40,7 +40,7 @@
 
 						<!-- Images additionnelles en miniature -->
 						{% if detailProduit.additionalImages is defined and detailProduit.additionalImages|length > 0 %}
-							{% for additionalImage in detailProduit.additionalImages|slice(0, 3) %}
+							{% for additionalImage in detailProduit.additionalImages|slice(0, 2) %}
 								<div class="thumbnail-item">
 									<img src="{{ asset('uploads/products/' ~ additionalImage) }}" data-full="{{ asset('uploads/products/' ~ additionalImage) }}" alt="{{ detailProduit.nom }}" class="w-16 h-16 object-cover rounded-lg cursor-pointer border border-gray-300 hover:border-gold transition"/>
 								</div>
@@ -92,7 +92,6 @@
 					</div>
 
 					<pre>
-            {{ dump(detailProduit.stock) }}
           </pre>
 					<div class="mt-8 flex items-center">
 						<div class="mr-4 flex items-center border border-gray-300 rounded-full overflow-hidden">

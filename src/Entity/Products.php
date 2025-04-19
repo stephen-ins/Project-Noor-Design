@@ -101,6 +101,15 @@ class Products
     {
         $this->stock = $stock;
 
+        // Mise à jour automatique du statut en fonction du stock
+        if ($stock > 0) {
+            $this->statut = 'En stock';
+        } else if ($stock == 0) {
+            $this->statut = 'Rupture de stock';
+        } else {
+            $this->statut = 'Sur commande';
+        }
+
         return $this;
     }
 
