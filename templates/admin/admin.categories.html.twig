@@ -1,64 +1,223 @@
 {% extends 'base.admin.html.twig' %}
 
-{% block title %}Noor Design | Admin
-{% endblock %}
+{% block title %}Noor Design | Admin{% endblock %}
 
 {# AFFICHAGE DE LA PAGE ADMINISTRATION DU SITE --> CATEGORIES #}
 
 {% block content %}
 
-	<!-- Main content -->
-	<main
-		class="flex-1 p-6">
-		<!-- Header -->
-		<div class="flex justify-between items-center border-b pb-4 mb-6">
-			<h1 class="text-2xl font-semibold">Gestion des Catégories</h1>
-			<button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded flex items-center shadow-sm transition duration-150 ease-in-out">
-				<i class="bi bi-plus mr-2"></i>
-				Ajouter une catégorie
-			</button>
-		</div>
+<!-- Main content -->
+<main class="flex-1 p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b pb-4 mb-6">
+        <h1 class="text-2xl font-semibold">Gestion des Catégories</h1>
+        <button id="openModal" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded flex items-center shadow-sm transition duration-150 ease-in-out">
+            <i class="bi bi-plus mr-2"></i>
+            Ajouter une catégorie
+        </button>
+    </div>
 
-		<!-- Tableau des catégories -->
-		<div class="bg-white rounded-lg shadow-sm overflow-hidden">
-			<table class="w-full text-left">
-				<thead class="bg-gray-100 border-b">
-					<tr>
-						<th class="px-6 py-3">Image</th>
-						<th class="px-6 py-3">Nom du produit</th>
-						<th class="px-6 py-3">Catégorie</th>
-						<th class="px-6 py-3">Prix</th>
-						<th class="px-6 py-3">Stock</th>
-						<th class="px-6 py-3">Statut</th>
-						<th class="px-6 py-3">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<!-- Creation des catégories par tour de boucle -->
-					<tr class="border-b hover:bg-gray-50">
-						<td class="px-6 py-4">
-							<img src="https://via.placeholder.com/50" alt="Bague Diamond" class="w-12 h-12 object-cover rounded"/>
-						</td>
-						<td class="px-6 py-4 font-medium">Bague Diamond Elite</td>
-						<td class="px-6 py-4">Bagues</td>
-						<td class="px-6 py-4">599 €</td>
-						<td class="px-6 py-4">12</td>
-						<td class="px-6 py-4">
-							<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">En stock</span>
-						</td>
-						<td class="px-6 py-4">
-							<div class="flex space-x-2">
-								<button class="text-blue-600 hover:text-blue-800">
-									<i class="bi bi-pencil"></i>
-								</button>
-								<button class="text-red-600 hover:text-red-800">
-									<i class="bi bi-trash"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</main>
+    <!-- Affichage des messages flash -->
+    {% for message in app.flashes('success') %}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">{{ message }}</span>
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">{{ message }}</span>
+        </div>
+    {% endfor %}
 
-	{% endblock %}
+    <!-- Tableau des catégories -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-100 border-b">
+                <tr>
+                    <th class="px-6 py-3">Nom</th>
+                    <th class="px-6 py-3">Description</th>
+                    <th class="px-6 py-3">Date d'enregistrement</th>
+                    <th class="px-6 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium">{{ category.nom }}</td>
+                    <td class="px-6 py-4">
+                        {% if category.description is not null %}
+                            {{ category.description|u.truncate(200, '...') }}
+                        {% else %}
+                            <span class="text-gray-400">Aucune description</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if category.dateCreation is not null %}
+                            {{ category.dateCreation|date('d/m/Y') }}
+                        {% else %}
+                            <span class="text-gray-400">Non définie</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex space-x-2">
+                            <a href="{{ path('app_admin_categories', {'edit': category.id}) }}" class="text-blue-600 hover:text-blue-800">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button class="delete-btn text-red-600 hover:text-red-800" data-id="{{ category.id }}" data-name="{{ category.nom }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">Aucune catégorie n'a été trouvée</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Modal d'ajout/édition de catégorie #}
+    <div id="categoryModal" class="fixed inset-0 flex items-center justify-center z-50 {% if not editCategory %}hidden{% endif %}">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-lg p-6 w-1/3 z-10">
+            <h2 class="text-xl font-semibold mb-4">
+                {% if editCategory %}Modifier la catégorie "{{ editCategory.nom }}"{% else %}Ajouter une catégorie{% endif %}
+            </h2>
+            
+            {{ form_start(formCategory, {'attr': {'class': 'space-y-4'}}) }}
+                <div class="mb-4">
+                    {{ form_label(formCategory.nom, 'Nom', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+                    {{ form_widget(formCategory.nom, {'attr': {'class': 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50'}}) }}
+                    {{ form_errors(formCategory.nom) }}
+                </div>
+                
+                <div class="mb-4">
+                    {{ form_label(formCategory.description, 'Description', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+                    {{ form_widget(formCategory.description, {'attr': {'class': 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50', 'rows': 5}}) }}
+                    {{ form_errors(formCategory.description) }}
+                </div>
+
+                {% if formCategory.date_creation is defined %}
+                <div class="mb-4">
+                    {{ form_label(formCategory.date_creation, 'Date de création', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+                    {{ form_widget(formCategory.date_creation, {'attr': {'class': 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50'}}) }}
+                    {{ form_errors(formCategory.date_creation) }}
+                </div>
+                {% endif %}
+                
+                <div class="flex justify-end">
+                    <button type="button" id="closeModal" class="bg-gray-300 hover:bg-gray-400 text-white px-4 py-2 rounded mr-2">Annuler</button>
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded">
+                        {% if editCategory %}Enregistrer les modifications{% else %}Ajouter{% endif %}
+                    </button>
+                </div>
+            {{ form_end(formCategory) }}
+        </div>
+    </div>
+
+{# Modal de suppression de catégorie #}
+    <div id="deleteModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-lg p-6 w-1/3 z-10">
+            <h2 class="text-xl font-semibold mb-4">Confirmer la suppression</h2>
+            <p class="mb-4">Êtes-vous sûr de vouloir supprimer la catégorie "<span id="categoryNameToDelete"></span>" ?</p>
+            <form id="deleteForm" method="POST" action="">
+                <input type="hidden" name="_token" value="">
+                <div class="flex justify-end mt-4">
+                    <button type="button" id="closeDeleteModal" class="bg-gray-300 hover:bg-gray-400 text-white px-4 py-2 rounded mr-2">Annuler</button>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Supprimer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // JavaScript pour contrôler les modales
+    document.addEventListener('DOMContentLoaded', function() {
+        // Variables pour la modale d'ajout/édition
+        const modal = document.getElementById('categoryModal');
+        const openBtn = document.getElementById('openModal');
+        const closeBtn = document.getElementById('closeModal');
+        
+        // Variables pour la modale de suppression
+        const deleteModal = document.getElementById('deleteModal');
+        const closeDeleteBtn = document.getElementById('closeDeleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        const categoryNameToDelete = document.getElementById('categoryNameToDelete');
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        
+        // Ouvrir la modale pour ajouter une nouvelle catégorie
+        openBtn.addEventListener('click', function() {
+            // Réinitialiser l'URL pour éviter de garder le paramètre edit
+            const url = new URL(window.location.href);
+            url.searchParams.delete('edit');
+            history.replaceState({}, '', url);
+            
+            // Ouvrir la modale
+            modal.classList.remove('hidden');
+        });
+        
+        // Fermer la modale (bouton Annuler)
+        closeBtn.addEventListener('click', function() {
+            // Réinitialiser l'URL si on ferme la modale d'édition
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('edit')) {
+                url.searchParams.delete('edit');
+                history.replaceState({}, '', url);
+            }
+            
+            modal.classList.add('hidden');
+        });
+        
+        // Fermer la modale en cliquant à l'extérieur
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                // Réinitialiser l'URL si on ferme la modale d'édition
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('edit')) {
+                    url.searchParams.delete('edit');
+                    history.replaceState({}, '', url);
+                }
+                
+                modal.classList.add('hidden');
+            }
+        });
+        
+        // Gestion de la modale de suppression
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const categoryId = this.getAttribute('data-id');
+                const categoryName = this.getAttribute('data-name');
+                
+                // Mettre à jour le texte de confirmation avec le nom de la catégorie
+                categoryNameToDelete.textContent = categoryName;
+                
+                // Configurer le formulaire de suppression
+                deleteForm.action = `/admin/categories/${categoryId}/delete`;
+                deleteForm.querySelector('input[name="_token"]').value = '{{ csrf_token("delete_category") }}';
+                
+                // Afficher la modale de suppression
+                deleteModal.classList.remove('hidden');
+            });
+        });
+        
+        // Fermer la modale de suppression (bouton Annuler)
+        closeDeleteBtn.addEventListener('click', function() {
+            deleteModal.classList.add('hidden');
+        });
+        
+        // Fermer la modale de suppression en cliquant à l'extérieur
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                deleteModal.classList.add('hidden');
+            }
+        });
+    });
+</script>
+
+{% endblock %}

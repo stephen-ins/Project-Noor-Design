@@ -3,18 +3,19 @@
 namespace App\Controller;
 
 use App\Entity\Users;
-use App\Entity\Categories;
 use App\Entity\Products;
+use App\Entity\Categories;
+use App\Form\CategoryFormType;
 use App\Form\ProductsFormType;
-use App\Repository\ProductsRepository;
 use App\Repository\UsersRepository;
+use App\Repository\ProductsRepository;
 use App\Repository\CategoriesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 #[Route('/admin', name: 'app_admin_')]
@@ -126,6 +127,80 @@ final class AdminController extends AbstractController
         ]);
     }
 
+    // route pour la gestion des catégories     
+    #[Route('/categories', name: 'categories')]
+    public function categories(Request $request, CategoriesRepository $categoriesRepository, EntityManagerInterface $entityManager): Response
+    {
+        // Récupération de toutes les catégories
+        $categories = $categoriesRepository->findAll();
+
+        // Récupération de l'ID de la catégorie à modifier (si présent)
+        $editCategoryId = $request->query->get('edit');
+        
+        // Pour l'édition d'une catégorie existante
+        if ($editCategoryId) {
+            $categoryToEdit = $categoriesRepository->find($editCategoryId);
+            if (!$categoryToEdit) {
+                $this->addFlash('error', 'La catégorie demandée n\'existe pas.');
+                return $this->redirectToRoute('app_admin_categories');
+            }
+            $formCategory = $this->createForm(CategoryFormType::class, $categoryToEdit);
+        } else {
+            // Pour l'ajout d'une nouvelle catégorie
+            $categoryToEdit = new Categories();
+            $formCategory = $this->createForm(CategoryFormType::class, $categoryToEdit);
+        }
+
+        $formCategory->handleRequest($request);
+
+        if ($formCategory->isSubmitted() && $formCategory->isValid()) {
+            // Si c'est une nouvelle catégorie, définir la date de création
+            if (!$categoryToEdit->getId()) {
+                $categoryToEdit->setDateCreation(new \DateTime());
+                $entityManager->persist($categoryToEdit);
+                $message = 'La catégorie a été ajoutée avec succès.';
+            } else {
+                $message = 'La catégorie a été modifiée avec succès.';
+            }
+
+            $entityManager->flush();
+            $this->addFlash('success', $message);
+
+            // Redirection pour éviter le problème de resoumission du formulaire
+            return $this->redirectToRoute('app_admin_categories');
+        }
+
+        return $this->render('admin/admin.categories.html.twig', [
+            'controller_name' => 'AdminController',
+            'categories' => $categories,
+            'formCategory' => $formCategory->createView(),
+            'editCategory' => $editCategoryId ? $categoryToEdit : null,
+        ]);
+    }
+    
+    // Route pour supprimer une catégorie
+    #[Route('/categories/{id}/delete', name: 'categories_delete', methods: ['POST'])]
+    public function deleteCategory(Request $request, Categories $category, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier le jeton CSRF
+        if ($this->isCsrfTokenValid('delete_category', $request->request->get('_token'))) {
+            try {
+                // Supprimer la catégorie
+                $entityManager->remove($category);
+                $entityManager->flush();
+                
+                $this->addFlash('success', 'La catégorie a été supprimée avec succès.');
+            } catch (\Exception $e) {
+                // Si une contrainte d'intégrité est violée (par exemple, la catégorie est utilisée par des produits)
+                $this->addFlash('error', 'Impossible de supprimer cette catégorie car elle est utilisée par des produits.');
+            }
+        } else {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+        }
+
+        return $this->redirectToRoute('app_admin_categories');
+    }
+
     // route pour la gestion des commandes
     #[Route('/orders', name: 'orders')]
     public function orders(): Response
@@ -135,14 +210,6 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    // route pour la gestion des catégories     
-    #[Route('/categories', name: 'categories')]
-    public function categories(): Response
-    {
-        return $this->render('admin/admin.categories.html.twig', [
-            'controller_name' => 'AdminController',
-        ]);
-    }
 
     // route pour la gestion des clients
     #[Route('/users', name: 'users')]

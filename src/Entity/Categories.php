@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CategoriesRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Categories
 {
     #[ORM\Id]
@@ -75,6 +76,15 @@ class Categories
         $this->date_creation = $date_creation;
 
         return $this;
+    }
+
+    /**
+     * Initialise automatiquement la date de création
+     */
+    #[ORM\PrePersist]
+    public function initializeCreationDate(): void
+    {
+        $this->date_creation = new \DateTime();
     }
 
     /**
