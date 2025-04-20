@@ -1,0 +1,131 @@
+{% extends 'base.admin.html.twig' %}
+
+{% block title %}Noor Design | Modifier un produit
+{% endblock %}
+
+{% block content %}
+	<main
+		class="flex-1 p-6">
+		<!-- Header -->
+		<div class="flex justify-between items-center border-b pb-4 mb-6">
+			<h1 class="text-2xl font-semibold">Modifier le produit</h1>
+			<a href="{{ path('app_admin_products') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded flex items-center shadow-sm transition duration-150 ease-in-out">
+				<i class="bi bi-arrow-left mr-2"></i>
+				Retour à la liste
+			</a>
+		</div>
+
+		<!-- Message d'erreur ou de succès -->
+		{% if app.session.flashBag.has('success') %}
+			<div class="bg-green-100 text-green-800 p-4 rounded-lg mb-6">
+				{{ app.session.flashBag.get('success')[0] }}
+			</div>
+		{% endif %}
+		{% if app.session.flashBag.has('error') %}
+			<div class="bg-red-100 text-red-800 p-4 rounded-lg mb-6">
+				{{ app.session.flashBag.get('error')[0] }}
+			</div>
+		{% endif %}
+
+		<!-- Formulaire d'édition -->
+		<div class="bg-white rounded-lg shadow-sm p-6">
+			{{ form_start(formProduct, {'attr': {'enctype': 'multipart/form-data'}}) }}
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+				<div class="col-span-1 md:col-span-2">
+					<div class="mb-4 flex items-center">
+						<img src="{{ asset('uploads/products/' ~ product.image) }}" class="w-24 h-24 object-cover rounded mr-4" alt="{{ product.nom }}"/>
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Image principale</label>
+							{{ form_widget(formProduct.image, {'attr': {'class': 'w-full text-sm', 'accept': 'image/*'}}) }}
+							{{ form_errors(formProduct.image) }}
+							<small class="text-gray-500">Laissez vide pour conserver l'image actuelle.</small>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-span-1 md:col-span-2">
+					<div class="mb-4">
+						<h4 class="block text-sm font-medium text-gray-700 mb-2">Images additionnelles actuelles</h4>
+						<div class="flex space-x-2 mb-2">
+							{% if product.additionalImages|length > 0 %}
+								{% for image in product.additionalImages %}
+									<img src="{{ asset('uploads/products/' ~ image) }}" alt="Image additionnelle" class="w-12 h-12 object-cover rounded">
+								{% endfor %}
+							{% else %}
+								<span class="text-gray-500">Aucune image additionnelle</span>
+							{% endif %}
+						</div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Modifier les images additionnelles</label>
+						{{ form_widget(formProduct.additionalImages, {'attr': {'class': 'w-full text-sm', 'accept': 'image/*', 'multiple': true}}) }}
+						{{ form_errors(formProduct.additionalImages) }}
+						<small class="text-gray-500">Vous pouvez sélectionner jusqu'à 2 images additionnelles. Laissez vide pour conserver les images actuelles.</small>
+					</div>
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+					{{ form_widget(formProduct.nom, {'attr': {'class': 'w-full px-3 py-2 border rounded'}}) }}
+					{{ form_errors(formProduct.nom) }}
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+					{{ form_widget(formProduct.categorie, {'attr': {'class': 'w-full px-3 py-2 border rounded'}}) }}
+					{{ form_errors(formProduct.categorie) }}
+				</div>
+
+				<div class="col-span-1 md:col-span-2">
+					<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+					{{ form_widget(formProduct.description, {'attr': {'rows': 4, 'class': 'w-full px-3 py-2 border rounded'}}) }}
+					{{ form_errors(formProduct.description) }}
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-1">Matière</label>
+					{{ form_widget(formProduct.materiaux, {'attr': {'class': 'w-full px-3 py-2 border rounded'}}) }}
+					{{ form_errors(formProduct.materiaux) }}
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-1">Taille</label>
+					{{ form_widget(formProduct.taille, {'attr': {'class': 'w-full px-3 py-2 border rounded'}}) }}
+					{{ form_errors(formProduct.taille) }}
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-1">Poids (Grammes)</label>
+					{{ form_widget(formProduct.poids, {'attr': {'class': 'w-full px-3 py-2 border rounded', 'placeholder': 'Poids en grammes'}}) }}
+					{{ form_errors(formProduct.poids) }}
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+					{{ form_widget(formProduct.prix, {'attr': {'class': 'w-full px-3 py-2 border rounded', 'min': 0, 'step': 0.01}}) }}
+					{{ form_errors(formProduct.prix) }}
+				</div>
+
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+					{{ form_widget(formProduct.stock, {'attr': {'class': 'w-full px-3 py-2 border rounded', 'min': 0}}) }}
+					{{ form_errors(formProduct.stock) }}
+				</div>
+
+				<div class="hidden">
+					<label class="block text-sm font-medium text-gray-700 mb-1">Date d'ajout</label>
+					{{ form_widget(formProduct.date_ajout, {'attr': {'class': 'w-full px-3 py-2 border rounded'}}) }}
+					{{ form_errors(formProduct.date_ajout) }}
+				</div>
+			</div>
+
+			<div class="flex justify-end space-x-3 border-t pt-4">
+				<a href="{{ path('app_admin_products') }}" class="px-4 py-2 border rounded hover:bg-gray-100">
+					Annuler
+				</a>
+				<button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700">
+					Enregistrer les modifications
+				</button>
+			</div>
+			{{ form_end(formProduct) }}
+		</div>
+	</main>
+{% endblock %}

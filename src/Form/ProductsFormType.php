@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -32,7 +33,7 @@ class ProductsFormType extends AbstractType
                 ],
             ])
 
-            ->add('description', TextType::class, [
+            ->add('description', TextareaType::class, [
                 'label' => 'Description du produit',
                 'required' => false,
                 'constraints' => [
@@ -41,7 +42,7 @@ class ProductsFormType extends AbstractType
                     ]),
                 ],
                 'attr' => [
-                    'rows' => 10,
+                    'rows' => 5,
                     'placeholder' => 'Description détaillée du produit',
                 ],
             ])
@@ -72,19 +73,6 @@ class ProductsFormType extends AbstractType
                     'placeholder' => 'Votre stock actuel',
                 ],
             ])
-
-            // ->add('statut', ChoiceType::class, [
-            //     'label' => 'Statut du produit',
-            //     'placeholder' => 'Sélectionnez le statut',
-            //     'required' => false,
-            //     'mapped' => false,
-            //     'choices' => [
-            //         'Produit en stock' => true,
-            //         'En rupture de stock' => false,
-            //     ],
-            //     'expanded' => false,
-            //     'multiple' => false,
-            // ])
 
             ->add('image', FileType::class, [
                 'label' => 'Image principale',
@@ -159,6 +147,7 @@ class ProductsFormType extends AbstractType
             ->add('date_ajout', null, [
                 'widget' => 'single_text',
                 'required' => false,
+                'data' => new \DateTimeImmutable(),
             ])
 
             ->add('categorie', EntityType::class, [

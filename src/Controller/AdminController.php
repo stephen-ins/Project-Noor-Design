@@ -30,128 +30,163 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    // route pour la gestion des produits (insertion, modification, suppression)
+    // route pour la gestion des produits (liste et suppression)
     #[Route('/products', name: 'products')]
-    public function products(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ProductsRepository $productsRepository, CategoriesRepository $categoriesRepository): Response
+    public function products(ProductsRepository $productsRepository, CategoriesRepository $categoriesRepository): Response
     {
-        // Récupérer l'ID du produit à éditer s'il est passé en paramètre
-        $productId = $request->query->get('id');
-        $product = null;
+        // Récupération de tous les produits
+        $products = $productsRepository->findAll();
+        
+        // Création d'un nouveau produit pour le formulaire d'ajout
+        $newProduct = new Products();
+        $newProduct->setDateAjout(new \DateTimeImmutable());
+        
+        // Création du formulaire d'ajout
+        $formProduct = $this->createForm(ProductsFormType::class, $newProduct);
+        
+        return $this->render('admin/admin.products.html.twig', [
+            'controller_name' => 'AdminController',
+            'products' => $products,
+            'categories' => $categoriesRepository->findAll(),
+            'formProduct' => $formProduct->createView(),
+        ]);
+    }
 
-        if ($productId) {
-            // Si un ID est fourni, charger le produit correspondant
-            $product = $productsRepository->find($productId);
-
-            if (!$product) {
-                $this->addFlash('error', 'Le produit demandé n\'existe pas.');
+    // route pour ajouter un produit
+    #[Route('/products/add', name: 'products_add', methods: ['POST'])]
+    public function addProduct(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    {
+        // Création d'un nouveau produit
+        $product = new Products();
+        $product->setDateAjout(new \DateTimeImmutable());
+        
+        // Création du formulaire
+        $form = $this->createForm(ProductsFormType::class, $product);
+        $form->handleRequest($request);
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Gestion de l'image principale
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+                
+                try {
+                    $imageFile->move($this->getParameter('products_images_directory'), $newFilename);
+                    $product->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload de l\'image: ' . $e->getMessage());
+                    return $this->redirectToRoute('app_admin_products');
+                }
+            } else {
+                // Image requise pour un nouveau produit
+                $this->addFlash('error', 'Une image principale est requise pour ajouter un produit.');
                 return $this->redirectToRoute('app_admin_products');
             }
-        } else {
-            // Sinon, créer un nouveau produit
-            $product = new Products();
-            $product->setDateAjout(new \DateTimeImmutable());
-        }
-
-        $formProduct = $this->createForm(ProductsFormType::class, $product);
-        $formProduct->handleRequest($request);
-
-        if ($formProduct->isSubmitted() && $formProduct->isValid()) {
-            // Gérer l'upload d'image principale
-            if ($formProduct->has('image')) {
-                $imageFile = $formProduct->get('image')->getData();
-
-                if ($imageFile) {
-                    // Nom de fichier d orgine sans extension
-                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    // Securiser le nom du fichier (supression espace etc... )
-                    $safeFilename = $slugger->slug($originalFilename);
-                    // On renomme l'image
-                    $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-                    // Repertoire de destination
-                    $currentPath = $this->getParameter('products_images_directory');
-
-                    try {
-                        // le try va tenter de copier l'image
-                        $imageFile->move($currentPath, $newFilename);
-                        // Mise à jour de l'entité produit avec le nom de l'image
-                        $product->setImage($newFilename);
-                    } catch (FileException $e) {
-                        $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload de l\'image principale: ' . $e->getMessage());
-                    }
-                } else if ($product->getId() && !$product->getImage()) {
-                    // Si c'est une édition et qu'il n'y a pas d'image, vérifier si une image existe déjà
-                    $existingProduct = $productsRepository->find($product->getId());
-                    if ($existingProduct && $existingProduct->getImage()) {
-                        $product->setImage($existingProduct->getImage());
-                    }
-                }
-            }
-
-            // Gérer les images additionnelles
-            $additionalImageFiles = [];
-            if ($formProduct->has('additionalImages')) {
-                $additionalImageFiles = $formProduct->get('additionalImages')->getData();
-            } else if ($request->files->has('additional_images')) {
-                // Récupérer les fichiers d'images additionnelles depuis le formulaire d'édition
-                $additionalImageFiles = $request->files->get('additional_images');
-            }
-
-            if ($additionalImageFiles && (is_array($additionalImageFiles) && count($additionalImageFiles) > 0)) {
+            
+            // Gestion des images additionnelles
+            $additionalImageFiles = $form->get('additionalImages')->getData();
+            if ($additionalImageFiles && count($additionalImageFiles) > 0) {
                 $additionalImages = [];
-                $currentPath = $this->getParameter('products_images_directory');
-
+                
                 foreach ($additionalImageFiles as $additionalImageFile) {
-                    if ($additionalImageFile) {
-                        $originalFilename = pathinfo($additionalImageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                        $safeFilename = $slugger->slug($originalFilename);
-                        $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $additionalImageFile->guessExtension();
-
-                        try {
-                            // Déplacer le fichier vers le répertoire de destination
-                            $additionalImageFile->move($currentPath, $newFilename);
-
-                            // Ajouter le nom du fichier au tableau des images additionnelles
-                            $additionalImages[] = $newFilename;
-                        } catch (FileException $e) {
-                            $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload d\'une image additionnelle: ' . $e->getMessage());
-                        }
+                    $originalFilename = pathinfo($additionalImageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $additionalImageFile->guessExtension();
+                    
+                    try {
+                        $additionalImageFile->move($this->getParameter('products_images_directory'), $newFilename);
+                        $additionalImages[] = $newFilename;
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload d\'une image additionnelle: ' . $e->getMessage());
                     }
                 }
-
-                // Si des nouvelles images ont été téléchargées, remplacer les anciennes
+                
                 if (count($additionalImages) > 0) {
                     $product->setAdditionalImages($additionalImages);
                 }
-            } else if ($product->getId()) {
-                // Si c'est une édition et qu'aucune nouvelle image n'a été fournie, conserver les images existantes
-                $existingProduct = $productsRepository->find($product->getId());
-                if ($existingProduct && $existingProduct->getAdditionalImages()) {
-                    $product->setAdditionalImages($existingProduct->getAdditionalImages());
-                }
             }
-
-            // Editer un produit existant via un formulaire modale "modifier un produit"
-            if ($product->getId()) {
-                $this->addFlash('success', 'Le produit a été modifié avec succès.');
-            } else {
-                $this->addFlash('success', 'Le produit a été ajouté avec succès.');
-            }
-
-            // Persistance et sauvegarde
+            
             $entityManager->persist($product);
             $entityManager->flush();
-
-            // Redirection pour éviter le problème de resoumission du formulaire
-            return $this->redirectToRoute('app_admin_products', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash('success', 'Le produit a été ajouté avec succès.');
+        } else {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
+        
+        return $this->redirectToRoute('app_admin_products');
+    }
 
-        return $this->render('admin/admin.products.html.twig', [
-            'controller_name' => 'AdminController',
-            'products' => $productsRepository->findAll(),
-            'categories' => $categoriesRepository->findAll(),
+    // route pour l'édition d'un produit
+    #[Route('/products/edit/{id}', name: 'products_edit', methods: ['GET', 'POST'])]
+    public function editProduct(Request $request, Products $product, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    {
+        // Sauvegarder l'image actuelle et les images additionnelles
+        $currentImage = $product->getImage();
+        $currentAdditionalImages = $product->getAdditionalImages();
+        
+        // Création du formulaire d'édition
+        $form = $this->createForm(ProductsFormType::class, $product);
+        $form->handleRequest($request);
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Gestion de l'image principale
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+                
+                try {
+                    $imageFile->move($this->getParameter('products_images_directory'), $newFilename);
+                    $product->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload de l\'image: ' . $e->getMessage());
+                }
+            } else {
+                // Conserver l'image actuelle si aucune nouvelle image n'est fournie
+                $product->setImage($currentImage);
+            }
+            
+            // Gestion des images additionnelles
+            $additionalImageFiles = $form->get('additionalImages')->getData();
+            if ($additionalImageFiles && count($additionalImageFiles) > 0) {
+                $additionalImages = [];
+                
+                foreach ($additionalImageFiles as $additionalImageFile) {
+                    $originalFilename = pathinfo($additionalImageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $additionalImageFile->guessExtension();
+                    
+                    try {
+                        $additionalImageFile->move($this->getParameter('products_images_directory'), $newFilename);
+                        $additionalImages[] = $newFilename;
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload d\'une image additionnelle: ' . $e->getMessage());
+                    }
+                }
+                
+                if (count($additionalImages) > 0) {
+                    $product->setAdditionalImages($additionalImages);
+                }
+            } else {
+                // Conserver les images additionnelles actuelles si aucune nouvelle image n'est fournie
+                $product->setAdditionalImages($currentAdditionalImages);
+            }
+            
+            $entityManager->flush();
+            $this->addFlash('success', 'Le produit a été modifié avec succès.');
+            
+            return $this->redirectToRoute('app_admin_products');
+        }
+        
+        // Si la requête est en GET, afficher le formulaire d'édition
+        return $this->render('admin/edit.product.html.twig', [
             'product' => $product,
-            'formProduct' => $formProduct->createView(),
-            'editMode' => $productId ? true : false,
+            'formProduct' => $form->createView(),
         ]);
     }
 
