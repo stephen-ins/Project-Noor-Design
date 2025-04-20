@@ -32,12 +32,24 @@ final class AdminController extends AbstractController
 
     // route pour la gestion des produits (insertion, modification, suppression)
     #[Route('/products', name: 'products')]
-    public function products(?Products $product, EntityManagerInterface $entityManager, Request $request, SluggerInterface $slugger, ProductsRepository $productsRepository, CategoriesRepository $categoriesRepository): Response
+    public function products(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ProductsRepository $productsRepository, CategoriesRepository $categoriesRepository): Response
     {
-        // INSERTION les produits dans la base de données via un formulaire modale "ajouter un produit"
-        if (!$product) {
+        // Récupérer l'ID du produit à éditer s'il est passé en paramètre
+        $productId = $request->query->get('id');
+        $product = null;
+
+        if ($productId) {
+            // Si un ID est fourni, charger le produit correspondant
+            $product = $productsRepository->find($productId);
+
+            if (!$product) {
+                $this->addFlash('error', 'Le produit demandé n\'existe pas.');
+                return $this->redirectToRoute('app_admin_products');
+            }
+        } else {
+            // Sinon, créer un nouveau produit
             $product = new Products();
-            $product->setDateAjout(new \DateTimeImmutable()); // Définir la date d'ajout pour un nouveau produit
+            $product->setDateAjout(new \DateTimeImmutable());
         }
 
         $formProduct = $this->createForm(ProductsFormType::class, $product);
@@ -61,24 +73,35 @@ final class AdminController extends AbstractController
                     try {
                         // le try va tenter de copier l'image
                         $imageFile->move($currentPath, $newFilename);
+                        // Mise à jour de l'entité produit avec le nom de l'image
+                        $product->setImage($newFilename);
                     } catch (FileException $e) {
                         $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload de l\'image principale: ' . $e->getMessage());
                     }
-
-                    // Mise à jour de l'entité produit avec le nom de l'image
-                    $product->setImage($newFilename);
+                } else if ($product->getId() && !$product->getImage()) {
+                    // Si c'est une édition et qu'il n'y a pas d'image, vérifier si une image existe déjà
+                    $existingProduct = $productsRepository->find($product->getId());
+                    if ($existingProduct && $existingProduct->getImage()) {
+                        $product->setImage($existingProduct->getImage());
+                    }
                 }
             }
 
             // Gérer les images additionnelles
+            $additionalImageFiles = [];
             if ($formProduct->has('additionalImages')) {
-                $additionalImages = [];
                 $additionalImageFiles = $formProduct->get('additionalImages')->getData();
+            } else if ($request->files->has('additional_images')) {
+                // Récupérer les fichiers d'images additionnelles depuis le formulaire d'édition
+                $additionalImageFiles = $request->files->get('additional_images');
+            }
 
-                if ($additionalImageFiles) {
-                    $currentPath = $this->getParameter('products_images_directory');
+            if ($additionalImageFiles && (is_array($additionalImageFiles) && count($additionalImageFiles) > 0)) {
+                $additionalImages = [];
+                $currentPath = $this->getParameter('products_images_directory');
 
-                    foreach ($additionalImageFiles as $additionalImageFile) {
+                foreach ($additionalImageFiles as $additionalImageFile) {
+                    if ($additionalImageFile) {
                         $originalFilename = pathinfo($additionalImageFile->getClientOriginalName(), PATHINFO_FILENAME);
                         $safeFilename = $slugger->slug($originalFilename);
                         $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $additionalImageFile->guessExtension();
@@ -93,29 +116,33 @@ final class AdminController extends AbstractController
                             $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload d\'une image additionnelle: ' . $e->getMessage());
                         }
                     }
+                }
 
-                    // Mise à jour de l'entité produit avec les images additionnelles
+                // Si des nouvelles images ont été téléchargées, remplacer les anciennes
+                if (count($additionalImages) > 0) {
                     $product->setAdditionalImages($additionalImages);
+                }
+            } else if ($product->getId()) {
+                // Si c'est une édition et qu'aucune nouvelle image n'a été fournie, conserver les images existantes
+                $existingProduct = $productsRepository->find($product->getId());
+                if ($existingProduct && $existingProduct->getAdditionalImages()) {
+                    $product->setAdditionalImages($existingProduct->getAdditionalImages());
                 }
             }
 
-            // Traitement du champ statut (non mappé directement)
-            if ($formProduct->has('statut')) {
-                $statut = $formProduct->get('statut')->getData();
-                // Si le statut est défini à false (rupture de stock), mettre le stock à 0
-                if ($statut === false) {
-                    $product->setStock(0);
-                }
+            // Editer un produit existant via un formulaire modale "modifier un produit"
+            if ($product->getId()) {
+                $this->addFlash('success', 'Le produit a été modifié avec succès.');
+            } else {
+                $this->addFlash('success', 'Le produit a été ajouté avec succès.');
             }
 
             // Persistance et sauvegarde
             $entityManager->persist($product);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le produit a été enregistré avec succès.');
-
             // Redirection pour éviter le problème de resoumission du formulaire
-            return $this->redirectToRoute('app_admin_products');
+            return $this->redirectToRoute('app_admin_products', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('admin/admin.products.html.twig', [
@@ -123,11 +150,44 @@ final class AdminController extends AbstractController
             'products' => $productsRepository->findAll(),
             'categories' => $categoriesRepository->findAll(),
             'product' => $product,
-            'formProduct' => $formProduct->createView(), // Passer le formulaire à la vue
+            'formProduct' => $formProduct->createView(),
+            'editMode' => $productId ? true : false,
         ]);
     }
 
-    // route pour la gestion des catégories     
+    // route pour supprimer un produit
+    #[Route('/products/delete', name: 'products_delete', methods: ['POST'])]
+    public function deleteProduct(Request $request, EntityManagerInterface $entityManager, ProductsRepository $productsRepository): Response
+    {
+        // Récupérer l'ID du produit à supprimer depuis la requête
+        $productId = $request->query->get('id');
+        $product = $productsRepository->find($productId);
+
+        if (!$product) {
+            $this->addFlash('error', 'Le produit demandé n\'existe pas.');
+            return $this->redirectToRoute('app_admin_products');
+        }
+
+        // Vérifier le jeton CSRF
+        if ($this->isCsrfTokenValid('delete_product', $request->request->get('_token'))) {
+            try {
+                // Supprimer le produit
+                $entityManager->remove($product);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Le produit a été supprimé avec succès.');
+            } catch (\Exception $e) {
+                // Si une contrainte d'intégrité est violée (par exemple, le produit est utilisé par des commandes)
+                $this->addFlash('error', 'Impossible de supprimer ce produit car il est utilisé par des commandes.');
+            }
+        } else {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+        }
+
+        return $this->redirectToRoute('app_admin_products');
+    }
+
+    // route pour la gestion des catégories (insertion, modification)    
     #[Route('/categories', name: 'categories')]
     public function categories(Request $request, CategoriesRepository $categoriesRepository, EntityManagerInterface $entityManager): Response
     {
@@ -136,7 +196,7 @@ final class AdminController extends AbstractController
 
         // Récupération de l'ID de la catégorie à modifier (si présent)
         $editCategoryId = $request->query->get('edit');
-        
+
         // Pour l'édition d'une catégorie existante
         if ($editCategoryId) {
             $categoryToEdit = $categoriesRepository->find($editCategoryId);
@@ -166,18 +226,22 @@ final class AdminController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $message);
 
-            // Redirection pour éviter le problème de resoumission du formulaire
-            return $this->redirectToRoute('app_admin_categories');
+            // Redirection explicite vers la route sans paramètre d'édition
+            return $this->redirectToRoute('app_admin_categories', [], Response::HTTP_SEE_OTHER);
         }
+
+        // Ajout d'un bouton pour réinitialiser le formulaire
+        $newCategoryButton = true;
 
         return $this->render('admin/admin.categories.html.twig', [
             'controller_name' => 'AdminController',
             'categories' => $categories,
             'formCategory' => $formCategory->createView(),
             'editCategory' => $editCategoryId ? $categoryToEdit : null,
+            'newCategoryButton' => $newCategoryButton,
         ]);
     }
-    
+
     // Route pour supprimer une catégorie
     #[Route('/categories/{id}/delete', name: 'categories_delete', methods: ['POST'])]
     public function deleteCategory(Request $request, Categories $category, EntityManagerInterface $entityManager): Response
@@ -188,7 +252,7 @@ final class AdminController extends AbstractController
                 // Supprimer la catégorie
                 $entityManager->remove($category);
                 $entityManager->flush();
-                
+
                 $this->addFlash('success', 'La catégorie a été supprimée avec succès.');
             } catch (\Exception $e) {
                 // Si une contrainte d'intégrité est violée (par exemple, la catégorie est utilisée par des produits)

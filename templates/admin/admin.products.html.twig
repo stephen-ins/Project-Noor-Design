@@ -136,17 +136,26 @@
 								</td>
 								<td class="px-1 py-2">{{ product.stock }}</td>
 								<td class="px-1 py-2">{{ product.dateAjout|date('d/m/Y') }}</td>
-								<td class="px-1 py-2">
-									<div
-										class="flex space-x-2">
 
-										{# Ouverture de la modale de modification #}
-										<button class="text-blue-600 hover:text-blue-800">
+								{# Dans la colonne actions du tableau des produits #}
+								<td class="px-1 py-2">
+									<div class="flex space-x-2">
+										<button type="button" class="text-blue-600 hover:text-blue-800 edit-product-btn" 
+											data-product-id="{{ product.id }}" 
+											data-product-name="{{ product.nom }}"
+											data-product-category="{{ product.categorie.id }}"
+											data-product-description="{{ product.description }}"
+											data-product-materiaux="{{ product.materiaux }}"
+											data-product-taille="{{ product.taille }}"
+											data-product-poids="{{ product.poids }}"
+											data-product-prix="{{ product.prix }}"
+											data-product-stock="{{ product.stock }}"
+											data-product-image="{{ product.image }}"
+											data-product-additional-images="{{ product.additionalImages|json_encode }}">
 											<i class="bi bi-pencil"></i>
 										</button>
 
-										{# Suppression du produit sans modale #}
-										<button class="text-red-600 hover:text-red-800 ">
+										<button type="button" class="text-red-600 hover:text-red-800 delete-product-btn" data-product-id="{{ product.id }}" data-product-name="{{ product.nom }}">
 											<i class="bi bi-trash"></i>
 										</button>
 									</div>
@@ -178,59 +187,68 @@
 					</button>
 				</div>
 				<div class="p-6">
-					<form id="editProductForm">
+					<form id="editProductForm" method="POST" action="" enctype="multipart/form-data">
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 							<div class="col-span-1 md:col-span-2">
 								<div class="mb-4 flex items-center">
 									<img id="previewImage" src="https://via.placeholder.com/100" class="w-24 h-24 object-cover rounded mr-4" alt="Aperçu du produit"/>
 									<div>
 										<label class="block text-sm font-medium text-gray-700 mb-1">Image du produit</label>
-										<input type="file" class="w-full text-sm" accept="image/*"/>
+										<input type="file" name="products[image]" class="w-full text-sm" accept="image/*"/>
 									</div>
+								</div>
+							</div>
+							<div class="col-span-1 md:col-span-2">
+								<div class="mb-4">
+									<h4 class="block text-sm font-medium text-gray-700 mb-2">Images additionnelles actuelles</h4>
+									<div id="additionalImagesPreview" class="flex space-x-2 mb-2">
+										<!-- Les aperçus des images additionnelles seront ajoutés ici par JavaScript -->
+									</div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Modifier les images additionnelles</label>
+									<input type="file" name="additional_images[]" multiple accept="image/*" class="w-full text-sm"/>
+									<small class="text-gray-500">Vous pouvez sélectionner jusqu'à 2 images additionnelles. Le téléchargement de nouvelles images remplacera les existantes.</small>
 								</div>
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
-								<input type="text" id="productName" class="w-full px-3 py-2 border rounded" required/>
+								<input type="text" id="productName" name="products[nom]" class="w-full px-3 py-2 border rounded" required/>
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-								<select id="productCategory" class="w-full px-3 py-2 border rounded" required>
+								<select id="productCategory" name="products[categorie]" class="w-full px-3 py-2 border rounded" required>
 									<option value="">Sélectionner une catégorie</option>
-									<option value="bagues">Bagues</option>
-									<option value="boucles_d_oreilles">Boucles d'oreilles</option>
-									<option value="bracelets">Bracelets</option>
-									<option value="grigris_noor">Grigris Noor</option>
-									<option value="pochettes_bijoux">Pochettes à bijoux</option>
+									{% for category in categories %}
+										<option value="{{ category.id }}">{{ category.nom }}</option>
+									{% endfor %}
 								</select>
 							</div>
 							<div class="col-span-1 md:col-span-2">
 								<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-								<textarea id="productDescription" rows="4" class="w-full px-3 py-2 border rounded"></textarea>
+								<textarea id="productDescription" name="products[description]" rows="4" class="w-full px-3 py-2 border rounded"></textarea>
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 mb-1">Matière</label>
-								<input type="text" id="productMaterial" class="w-full px-3 py-2 border rounded" required/>
+								<input type="text" id="productMaterial" name="products[materiaux]" class="w-full px-3 py-2 border rounded" required/>
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 mb-1">Taille</label>
-								<input type="text" id="productSize" class="w-full px-3 py-2 border rounded" required/>
+								<input type="text" id="productSize" name="products[taille]" class="w-full px-3 py-2 border rounded" required/>
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 mb-1">Poids (Grammes)</label>
-								<input type="text" id="productWeight" class="w-full px-3 py-2 border rounded" required/>
+								<input type="text" id="productWeight" name="products[poids]" class="w-full px-3 py-2 border rounded" required/>
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
-								<input type="number" id="productPrice" class="w-full px-3 py-2 border rounded" min="0" step="0.01" required/>
+								<input type="number" id="productPrice" name="products[prix]" class="w-full px-3 py-2 border rounded" min="0" step="0.01" required/>
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-								<input type="number" id="productStock" class="w-full px-3 py-2 border rounded" min="0" required/>
+								<input type="number" id="productStock" name="products[stock]" class="w-full px-3 py-2 border rounded" min="0" required/>
 							</div>
-							<div>
+							<div class="hidden">
 								<label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-								<select id="productStatus" class="w-full px-3 py-2 border rounded">
+								<select id="productStatus" name="products[status]" class="w-full px-3 py-2 border rounded">
 									<option value="">Sélectionner un statut</option>
 									<option value="en_stock">En stock</option>
 									<option value="epuise">Épuisé</option>
@@ -238,14 +256,14 @@
 							</div>
 							<div class="hidden">
 								<label class="block text-sm font-medium text-gray-700 mb-1">Date d'ajout</label>
-								<input type="date" id="productDateAdded" class="w-full px-3 py-2 border rounded" required/>
+								<input type="date" id="productDateAdded" name="products[date_ajout]" class="w-full px-3 py-2 border rounded"/>
 							</div>
 						</div>
 						<div class="flex justify-end space-x-3 border-t pt-4 sticky bottom-0 bg-white">
 							<button type="button" id="cancelEdit" class="px-4 py-2 border rounded hover:bg-gray-100">
 								Annuler
 							</button>
-							<button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+							<button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700">
 								Enregistrer les modifications
 							</button>
 						</div>
@@ -353,63 +371,196 @@
 
 		</div>
 
+		<!-- Modale de suppression de produit -->
+		<div id="deleteProductModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-50">
+			<div class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
+				<div class="text-center">
+					<h3 class="text-xl font-semibold mb-4">Confirmer la suppression</h3>
+					<p class="mb-6">Êtes-vous sûr de vouloir supprimer le produit "<span id="productNameToDelete"></span>" ? Cette action est irréversible.</p>
+
+					<form id="deleteProductForm" method="POST" action="">
+						<input type="hidden" name="_token" id="deleteProductToken" value="">
+
+						<div class="flex justify-center space-x-4">
+							<button type="button" id="cancelDeleteProduct" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
+								Annuler
+							</button>
+							<button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+								Supprimer
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
 	</main>
 {% endblock %}
 {% block javascripts %}
 	{{ parent() }}
 	<script>
-		document.addEventListener('DOMContentLoaded', function () { // Récupération des éléments de la modale d'édition
-const modale = document.getElementById('editProductModal');
-const closeEditModal = document.getElementById('closeEditModal');
-const cancelEdit = document.getElementById('cancelEdit');
-const editButtons = document.querySelectorAll('.text-blue-600');
-// Récupération des éléments de la modale d'ajout
-const addModale = document.getElementById('addProductModal');
-const openAddProductModal = document.getElementById('openAddProductModal');
-const closeAddModal = document.getElementById('closeAddModal');
-const cancelAdd = document.getElementById('cancelAdd');
-
-// Ajouter un écouteur d'événement à chaque bouton d'édition (crayon)
-editButtons.forEach(button => {
-button.addEventListener('click', function () {
-modale.classList.remove('hidden');
-});
-});
-
-// Fermer la modale avec le bouton X
-if (closeEditModal) {
-closeEditModal.addEventListener('click', function () {
-modale.classList.add('hidden');
-});
-}
-
-// Fermer la modale avec le bouton Annuler
-if (cancelEdit) {
-cancelEdit.addEventListener('click', function () {
-modale.classList.add('hidden');
-});
-}
-
-// Ouvrir la modale d'ajout de produit
-if (openAddProductModal) {
-openAddProductModal.addEventListener('click', function () {
-addModale.classList.remove('hidden');
-});
-}
-
-// Fermer la modale d'ajout avec le bouton X
-if (closeAddModal) {
-closeAddModal.addEventListener('click', function () {
-addModale.classList.add('hidden');
-});
-}
-
-// Fermer la modale d'ajout avec le bouton Annuler
-if (cancelAdd) {
-cancelAdd.addEventListener('click', function () {
-addModale.classList.add('hidden');
-});
-}
+		document.addEventListener('DOMContentLoaded', function () {
+    // Récupération des éléments de la modale d'édition
+    const editModal = document.getElementById('editProductModal');
+    const closeEditModal = document.getElementById('closeEditModal');
+    const cancelEdit = document.getElementById('cancelEdit');
+    const editButtons = document.querySelectorAll('.edit-product-btn');
+    const editForm = document.getElementById('editProductForm');
+    
+    // Récupération des éléments de la modale d'ajout
+    const addModal = document.getElementById('addProductModal');
+    const openAddProductModal = document.getElementById('openAddProductModal');
+    const closeAddModal = document.getElementById('closeAddModal');
+    const cancelAdd = document.getElementById('cancelAdd');
+    
+    // Récupération des éléments de la modale de suppression
+    const deleteModal = document.getElementById('deleteProductModal');
+    const cancelDeleteProduct = document.getElementById('cancelDeleteProduct');
+    const deleteButtons = document.querySelectorAll('.delete-product-btn');
+    const deleteForm = document.getElementById('deleteProductForm');
+    const productNameToDelete = document.getElementById('productNameToDelete');
+    const deleteProductToken = document.getElementById('deleteProductToken');
+    
+    // Ajouter un écouteur d'événement à chaque bouton d'édition
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Récupérer les données du produit depuis les attributs data-*
+            const productId = this.getAttribute('data-product-id');
+            
+            // Remplir le formulaire avec les données du produit
+            document.getElementById('productName').value = this.getAttribute('data-product-name');
+            document.getElementById('productCategory').value = this.getAttribute('data-product-category');
+            document.getElementById('productDescription').value = this.getAttribute('data-product-description');
+            document.getElementById('productMaterial').value = this.getAttribute('data-product-materiaux');
+            document.getElementById('productSize').value = this.getAttribute('data-product-taille');
+            document.getElementById('productWeight').value = this.getAttribute('data-product-poids');
+            document.getElementById('productPrice').value = this.getAttribute('data-product-prix');
+            document.getElementById('productStock').value = this.getAttribute('data-product-stock');
+            
+            // Afficher l'image actuelle
+            const productImage = this.getAttribute('data-product-image');
+            if (productImage && productImage !== 'null') {
+                const previewImage = document.getElementById('previewImage');
+                previewImage.src = `/uploads/products/${productImage}`;
+            }
+            
+            // Afficher les images additionnelles actuelles
+            const additionalImagesPreview = document.getElementById('additionalImagesPreview');
+            additionalImagesPreview.innerHTML = '';
+            const additionalImagesData = this.getAttribute('data-product-additional-images');
+            
+            if (additionalImagesData && additionalImagesData !== 'null') {
+                try {
+                    const additionalImages = JSON.parse(additionalImagesData);
+                    if (additionalImages && additionalImages.length > 0) {
+                        additionalImages.forEach(image => {
+                            const imgElement = document.createElement('img');
+                            imgElement.src = `/uploads/products/${image}`;
+                            imgElement.alt = 'Image additionnelle';
+                            imgElement.className = 'w-12 h-12 object-cover rounded';
+                            additionalImagesPreview.appendChild(imgElement);
+                        });
+                    }
+                } catch (e) {
+                    console.error('Erreur lors du parsing des images additionnelles:', e);
+                }
+            }
+            
+            // Modifier l'action du formulaire pour l'édition
+            editForm.action = `/admin/products?id=${productId}`;
+            editForm.method = 'POST';
+            editForm.enctype = 'multipart/form-data';
+            
+            // Ajouter un token CSRF
+            if (!document.getElementById('edit_csrf_token')) {
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.id = 'edit_csrf_token';
+                csrfToken.value = '{{ csrf_token('edit_product') }}';
+                editForm.appendChild(csrfToken);
+            }
+            
+            // Afficher la modale d'édition
+            editModal.classList.remove('hidden');
+        });
+    });
+    
+    // Ajouter un écouteur d'événement à chaque bouton de suppression
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Récupérer les données du produit depuis les attributs data-*
+            const productId = this.getAttribute('data-product-id');
+            const productName = this.getAttribute('data-product-name');
+            
+            // Remplir les informations de la modale de suppression
+            if (productNameToDelete) {
+                productNameToDelete.textContent = productName;
+            }
+            
+            // Configurer le formulaire de suppression
+            deleteForm.action = `/admin/products/delete?id=${productId}`;
+            deleteProductToken.value = '{{ csrf_token('delete_product') }}';
+            
+            // Afficher la modale de suppression
+            deleteModal.classList.remove('hidden');
+        });
+    });
+    
+    // Fermer la modale d'édition avec le bouton X
+    if (closeEditModal) {
+        closeEditModal.addEventListener('click', function() {
+            editModal.classList.add('hidden');
+        });
+    }
+    
+    // Fermer la modale d'édition avec le bouton Annuler
+    if (cancelEdit) {
+        cancelEdit.addEventListener('click', function() {
+            editModal.classList.add('hidden');
+        });
+    }
+    
+    // Ouvrir la modale d'ajout de produit
+    if (openAddProductModal) {
+        openAddProductModal.addEventListener('click', function() {
+            addModal.classList.remove('hidden');
+        });
+    }
+    
+    // Fermer la modale d'ajout avec le bouton X
+    if (closeAddModal) {
+        closeAddModal.addEventListener('click', function() {
+            addModal.classList.add('hidden');
+        });
+    }
+    
+    // Fermer la modale d'ajout avec le bouton Annuler
+    if (cancelAdd) {
+        cancelAdd.addEventListener('click', function() {
+            addModal.classList.add('hidden');
+        });
+    }
+    
+    // Fermer la modale de suppression avec le bouton Annuler
+    if (cancelDeleteProduct) {
+        cancelDeleteProduct.addEventListener('click', function() {
+            deleteModal.classList.add('hidden');
+        });
+    }
+    
+    // Fermer les modales en cliquant à l'extérieur
+    window.addEventListener('click', function(event) {
+        if (event.target === editModal) {
+            editModal.classList.add('hidden');
+        }
+        if (event.target === addModal) {
+            addModal.classList.add('hidden');
+        }
+        if (event.target === deleteModal) {
+            deleteModal.classList.add('hidden');
+        }
+    });
 });
 	</script>
 {% endblock %}
