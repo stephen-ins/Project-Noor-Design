@@ -45,7 +45,7 @@
                     <tbody>
                         {% for order in orders %}
                             <tr class="border-t border-gray-200">
-                                <td class="py-4 px-4">#{{ order.id }}</td>
+                                <td class="py-4 px-4">{{ order_number(order) }}</td>
                                 <td class="py-4 px-4">{{ order.dateCommande|date('d/m/Y') }}</td>
                                 <td class="py-4 px-4 text-center">
                                     {% if order.status.value == 'En attente' %}

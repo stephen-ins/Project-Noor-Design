@@ -56,7 +56,8 @@ final class CartController extends AbstractController
         }
 
         $cart = $session->get('cart', []);
-        $quantity = (int)$request->query->get('quantity', 1);
+        // Récupérer la quantité depuis le corps de la requête POST
+        $quantity = (int)$request->request->get('quantity', 1);
 
         if (!empty($cart[$id])) {
             $cart[$id] += $quantity;
