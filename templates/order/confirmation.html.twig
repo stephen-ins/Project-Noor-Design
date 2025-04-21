@@ -1,96 +1,97 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Noor Design | Confirmation de commande{% endblock %}
+{% block title %}Noor Design | Confirmation de commande
+{% endblock %}
 
 {% block content %}
-    <!-- Page Header -->
-    <div class="color-bg-header py-16">
-        <div class="container mx-auto px-6 text-center">
-            <h1 class="text-4xl font-semibold text-gray-800 mb-2">Confirmation de commande</h1>
-            <p class="text-lg text-gray-600">
-                Votre commande a été enregistrée avec succès
-            </p>
-        </div>
-    </div>
+	<!-- Page Header -->
+	<div class="color-bg-header py-16">
+		<div class="container mx-auto px-6 text-center">
+			<h1 class="text-4xl font-semibold text-gray-800 mb-2">Confirmation de commande</h1>
+			<p class="text-lg text-gray-600">
+				Votre commande a été enregistrée avec succès
+			</p>
+		</div>
+	</div>
 
-    <!-- Section de confirmation -->
-    <div class="container mx-auto px-6 py-12">
-        <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-            <div class="flex items-center justify-center mb-6">
-                <div class="bg-green-100 rounded-full p-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-            </div>
+	<!-- Section de confirmation -->
+	<div class="container mx-auto px-6 py-12">
+		<div class="bg-white rounded-lg shadow-md p-8 mb-8">
+			<div class="flex items-center justify-center mb-6">
+				<div class="bg-green-100 rounded-full p-3">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+					</svg>
+				</div>
+			</div>
 
-            <h2 class="text-2xl font-semibold text-center text-gray-800 mb-4">
-                Merci pour votre commande !
-            </h2>
-            
-            <p class="text-center text-gray-600 mb-6">
-                Votre commande #{{ order.id }} a été enregistrée et sera traitée dans les plus brefs délais.
-            </p>
+			<h2 class="text-2xl font-semibold text-center text-gray-800 mb-4">
+				Merci pour votre commande !
+			</h2>
 
-            <div class="border-t border-b border-gray-200 py-4 my-6">
-                <div class="flex justify-between mb-2">
-                    <span class="text-gray-600">Date de commande :</span>
-                    <span class="font-medium">{{ order.dateCommande|date('d/m/Y à H:i') }}</span>
-                </div>
-                <div class="flex justify-between mb-2">
-                    <span class="text-gray-600">Statut :</span>
-                    <span class="font-medium">{{ order.status.value }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Total :</span>
-                    <span class="font-medium text-gold">{{ order.total }} €</span>
-                </div>
-            </div>
+			<p class="text-center text-gray-600 mb-6">
+				Votre commande <strong>#noor-{{ order.dateCommande|date('dmY') }}-{{ order.id }}</strong>
+				a été enregistrée et sera traitée dans les plus brefs délais.
+			</p>
 
-            <h3 class="text-xl font-semibold mb-4">Détails de la commande</h3>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border border-gray-200 mb-6">
-                    <thead>
-                        <tr class="bg-gray-100 text-gray-600">
-                            <th class="py-3 px-4 text-left">Produit</th>
-                            <th class="py-3 px-4 text-center">Prix unitaire</th>
-                            <th class="py-3 px-4 text-center">Quantité</th>
-                            <th class="py-3 px-4 text-center">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for detail in order.orderDetails %}
-                            <tr class="border-t border-gray-200">
-                                <td class="py-4 px-4">
-                                    <div class="flex items-center">
-                                        <img
-                                            src="{{ asset('uploads/products/' ~ detail.product.image) }}"
-                                            alt="{{ detail.product.nom }}"
-                                            class="w-12 h-12 object-cover rounded mr-4"
-                                        />
-                                        <span class="font-medium">{{ detail.product.nom }}</span>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-4 text-center">{{ detail.prix }} €</td>
-                                <td class="py-4 px-4 text-center">{{ detail.quantity }}</td>
-                                <td class="py-4 px-4 text-center font-medium">
-                                    {{ (detail.prix * detail.quantity)|number_format(2, '.', ' ') }} €
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+			<div class="border-t border-b border-gray-200 py-4 my-6">
+				<div class="flex justify-between mb-2">
+					<span class="text-gray-600">Date de commande :</span>
+					<span class="font-medium">{{ order.dateCommande|date('d/m/Y à H:i') }}</span>
+				</div>
+				<div class="flex justify-between mb-2">
+					<span class="text-gray-600">Statut :</span>
+					<span class="font-medium">{{ order.status.value }}</span>
+				</div>
+				<div class="flex justify-between">
+					<span class="text-gray-600">Total :</span>
+					<span class="font-medium text-gold">{{ order.total }}
+						€</span>
+				</div>
+			</div>
 
-            <div class="text-center mt-8">
-                <a href="{{ path('app_catalogue') }}" class="bg-gold text-white px-6 py-3 rounded-full hover:bg-yellow-600 transition">
-                    Continuer mes achats
-                </a>
-                <a href="{{ path('order_history') }}" class="text-gold hover:underline ml-4">
-                    Voir mes commandes
-                </a>
-            </div>
-        </div>
-    </div>
+			<h3 class="text-xl font-semibold mb-4">Détails de la commande</h3>
+
+			<div class="overflow-x-auto">
+				<table class="min-w-full bg-white border border-gray-200 mb-6">
+					<thead>
+						<tr class="bg-gray-100 text-gray-600">
+							<th class="py-3 px-4 text-left">Produit</th>
+							<th class="py-3 px-4 text-center">Prix unitaire</th>
+							<th class="py-3 px-4 text-center">Quantité</th>
+							<th class="py-3 px-4 text-center">Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for detail in order.orderDetails %}
+							<tr class="border-t border-gray-200">
+								<td class="py-4 px-4">
+									<div class="flex items-center">
+										<img src="{{ asset('uploads/products/' ~ detail.product.image) }}" alt="{{ detail.product.nom }}" class="w-12 h-12 object-cover rounded mr-4"/>
+										<span class="font-medium">{{ detail.product.nom }}</span>
+									</div>
+								</td>
+								<td class="py-4 px-4 text-center">{{ detail.prix }}
+									€</td>
+								<td class="py-4 px-4 text-center">{{ detail.quantity }}</td>
+								<td class="py-4 px-4 text-center font-medium">
+									{{ (detail.prix * detail.quantity)|number_format(2, '.', ' ') }}
+									€
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+
+			<div class="text-center mt-8">
+				<a href="{{ path('app_catalogue') }}" class="bg-gold text-white px-6 py-3 rounded-full hover:bg-yellow-600 transition">
+					Continuer mes achats
+				</a>
+				<a href="{{ path('order_history') }}" class="text-gold hover:underline ml-4">
+					Voir mes commandes
+				</a>
+			</div>
+		</div>
+	</div>
 {% endblock %}
