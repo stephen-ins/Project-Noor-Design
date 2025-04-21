@@ -16,7 +16,7 @@
 			</h1>
 			<p class="text-lg text-gray-600">
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Est,
-																																																																																								          possimus!
+																																																																																												          possimus!
 			</p>
 		</div>
 	</div>
@@ -94,30 +94,39 @@
 					<pre>
           </pre>
 					<div class="mt-8 flex items-center">
-						<div class="mr-4 flex items-center border border-gray-300 rounded-full overflow-hidden">
-							<select
-								class="bg-white border-none focus:outline-none focus:ring-2 focus:ring-gold text-sm px-4 py-2 rounded-full">
-								{# inserer une condition pour mettre le stock disponible #}
-								{% if detailProduit.stock > 0 %}
-									{% for i in 1..detailProduit.stock %}
-										<option value="{{ i }}">{{ i }}</option>
-									{% endfor %}
-								{% else %}
-									<option value="0" disabled selected>Rupture de stock</option>
-								{% endif %}
-							</select>
-						</div>
+    <form action="{{ path('cart_add', {'id': detailProduit.id}) }}" method="POST" class="flex items-center">
+        <div class="mr-4 flex items-center border border-gray-300 rounded-full overflow-hidden">
+            <select name="quantity" class="bg-white border-none focus:outline-none focus:ring-2 focus:ring-gold text-sm px-4 py-2 rounded-full">
+                {% if detailProduit.stock > 0 %}
+                    {% for i in 1..detailProduit.stock %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                {% else %}
+                    <option value="0" disabled selected>Rupture de stock</option>
+                {% endif %}
+            </select>
+        </div>
 
-						<button class="bg-gold text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition">
-							Ajouter au panier
-						</button>
+        {% if detailProduit.stock > 0 %}
+            <button type="submit" class="bg-gold text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition">
+                Ajouter au panier
+            </button>
+        {% else %}
+            <button type="button" disabled class="bg-gray-400 text-white px-6 py-2 rounded-full cursor-not-allowed">
+                Rupture de stock
+            </button>
+        {% endif %}
 
-						<div>
-							<button class="bg-gray-200 text-gray-800 px-6 py-2 rounded-full hover:bg-gray-300 transition ml-4">
-								Ajouter à ma whishlist
-							</button>
-						</div>
-					</div>
+        <input type="hidden" name="redirect_to_cart" value="0">
+        <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart') }}">
+    </form>
+
+    <div>
+        <button class="bg-gray-200 text-gray-800 px-6 py-2 rounded-full hover:bg-gray-300 transition ml-4">
+            Ajouter à ma wishlist
+        </button>
+    </div>
+</div>
 				</div>
 			</div>
 		</div>

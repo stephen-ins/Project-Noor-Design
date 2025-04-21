@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Users;
+use App\Entity\Orders;
 use App\Entity\Products;
 use App\Entity\Categories;
 use App\Form\CategoryFormType;
@@ -36,14 +37,14 @@ final class AdminController extends AbstractController
     {
         // Récupération de tous les produits
         $products = $productsRepository->findAll();
-        
+
         // Création d'un nouveau produit pour le formulaire d'ajout
         $newProduct = new Products();
         $newProduct->setDateAjout(new \DateTimeImmutable());
-        
+
         // Création du formulaire d'ajout
         $formProduct = $this->createForm(ProductsFormType::class, $newProduct);
-        
+
         return $this->render('admin/admin.products.html.twig', [
             'controller_name' => 'AdminController',
             'products' => $products,
@@ -59,11 +60,11 @@ final class AdminController extends AbstractController
         // Création d'un nouveau produit
         $product = new Products();
         $product->setDateAjout(new \DateTimeImmutable());
-        
+
         // Création du formulaire
         $form = $this->createForm(ProductsFormType::class, $product);
         $form->handleRequest($request);
-        
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Gestion de l'image principale
             $imageFile = $form->get('image')->getData();
@@ -71,7 +72,7 @@ final class AdminController extends AbstractController
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-                
+
                 try {
                     $imageFile->move($this->getParameter('products_images_directory'), $newFilename);
                     $product->setImage($newFilename);
@@ -84,17 +85,17 @@ final class AdminController extends AbstractController
                 $this->addFlash('error', 'Une image principale est requise pour ajouter un produit.');
                 return $this->redirectToRoute('app_admin_products');
             }
-            
+
             // Gestion des images additionnelles
             $additionalImageFiles = $form->get('additionalImages')->getData();
             if ($additionalImageFiles && count($additionalImageFiles) > 0) {
                 $additionalImages = [];
-                
+
                 foreach ($additionalImageFiles as $additionalImageFile) {
                     $originalFilename = pathinfo($additionalImageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = $slugger->slug($originalFilename);
                     $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $additionalImageFile->guessExtension();
-                    
+
                     try {
                         $additionalImageFile->move($this->getParameter('products_images_directory'), $newFilename);
                         $additionalImages[] = $newFilename;
@@ -102,12 +103,12 @@ final class AdminController extends AbstractController
                         $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload d\'une image additionnelle: ' . $e->getMessage());
                     }
                 }
-                
+
                 if (count($additionalImages) > 0) {
                     $product->setAdditionalImages($additionalImages);
                 }
             }
-            
+
             $entityManager->persist($product);
             $entityManager->flush();
             $this->addFlash('success', 'Le produit a été ajouté avec succès.');
@@ -116,7 +117,7 @@ final class AdminController extends AbstractController
                 $this->addFlash('error', $error->getMessage());
             }
         }
-        
+
         return $this->redirectToRoute('app_admin_products');
     }
 
@@ -127,11 +128,11 @@ final class AdminController extends AbstractController
         // Sauvegarder l'image actuelle et les images additionnelles
         $currentImage = $product->getImage();
         $currentAdditionalImages = $product->getAdditionalImages();
-        
+
         // Création du formulaire d'édition
         $form = $this->createForm(ProductsFormType::class, $product);
         $form->handleRequest($request);
-        
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Gestion de l'image principale
             $imageFile = $form->get('image')->getData();
@@ -139,7 +140,7 @@ final class AdminController extends AbstractController
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-                
+
                 try {
                     $imageFile->move($this->getParameter('products_images_directory'), $newFilename);
                     $product->setImage($newFilename);
@@ -150,17 +151,17 @@ final class AdminController extends AbstractController
                 // Conserver l'image actuelle si aucune nouvelle image n'est fournie
                 $product->setImage($currentImage);
             }
-            
+
             // Gestion des images additionnelles
             $additionalImageFiles = $form->get('additionalImages')->getData();
             if ($additionalImageFiles && count($additionalImageFiles) > 0) {
                 $additionalImages = [];
-                
+
                 foreach ($additionalImageFiles as $additionalImageFile) {
                     $originalFilename = pathinfo($additionalImageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = $slugger->slug($originalFilename);
                     $newFilename = 'noor-' . $safeFilename . '-' . uniqid() . '.' . $additionalImageFile->guessExtension();
-                    
+
                     try {
                         $additionalImageFile->move($this->getParameter('products_images_directory'), $newFilename);
                         $additionalImages[] = $newFilename;
@@ -168,7 +169,7 @@ final class AdminController extends AbstractController
                         $this->addFlash('error', 'Une erreur s\'est produite lors de l\'upload d\'une image additionnelle: ' . $e->getMessage());
                     }
                 }
-                
+
                 if (count($additionalImages) > 0) {
                     $product->setAdditionalImages($additionalImages);
                 }
@@ -176,13 +177,13 @@ final class AdminController extends AbstractController
                 // Conserver les images additionnelles actuelles si aucune nouvelle image n'est fournie
                 $product->setAdditionalImages($currentAdditionalImages);
             }
-            
+
             $entityManager->flush();
             $this->addFlash('success', 'Le produit a été modifié avec succès.');
-            
+
             return $this->redirectToRoute('app_admin_products');
         }
-        
+
         // Si la requête est en GET, afficher le formulaire d'édition
         return $this->render('admin/edit.product.html.twig', [
             'product' => $product,
@@ -300,14 +301,47 @@ final class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin_categories');
     }
 
+
     // route pour la gestion des commandes
     #[Route('/orders', name: 'orders')]
-    public function orders(): Response
+    public function orders(EntityManagerInterface $entityManager): Response
     {
+        $orders = $entityManager->getRepository(Orders::class)->findBy([], ['date_commande' => 'DESC']);
+
         return $this->render('admin/admin.orders.html.twig', [
             'controller_name' => 'AdminController',
+            'orders' => $orders
         ]);
     }
+
+    // route pour voir le détail d'une commande
+    #[Route('/orders/{id}', name: 'orders_detail')]
+    public function orderDetail(Orders $order): Response
+    {
+        return $this->render('admin/admin.order.detail.html.twig', [
+            'controller_name' => 'AdminController',
+            'order' => $order
+        ]);
+    }
+
+    // route pour mettre à jour le statut d'une commande
+    #[Route('/orders/{id}/status', name: 'orders_update_status', methods: ['POST'])]
+    public function updateOrderStatus(Request $request, Orders $order, EntityManagerInterface $entityManager): Response
+    {
+        $newStatus = $request->request->get('status');
+
+        if ($newStatus && in_array($newStatus, OrderStatus::getValues())) {
+            $order->setStatus(OrderStatus::from($newStatus));
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Le statut de la commande a été mis à jour');
+        } else {
+            $this->addFlash('error', 'Statut invalide');
+        }
+
+        return $this->redirectToRoute('app_admin_orders_detail', ['id' => $order->getId()]);
+    }
+
 
 
     // route pour la gestion des clients
