@@ -35,7 +35,6 @@ final class IndexController extends AbstractController
     {
         // Récupérer tous les produits de la base de données
         $allProducts = $repoAllProducts->findAll();
-        dump($allProducts);
 
         return $this->render('app/catalogue.html.twig', [
             'controller_name' => 'Catalogue',
@@ -65,7 +64,6 @@ final class IndexController extends AbstractController
     {
         // Récupérer le produit par son ID
         $detailProduit = $repo->find($id);
-        dump($detailProduit);
 
         return $this->render('app/produit.html.twig', [
             'controller_name' => 'Produit',

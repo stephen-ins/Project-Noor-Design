@@ -82,7 +82,14 @@
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
 						</svg>
-						<span>(0)</span>
+						{# insertion du nombre de produit en commande dans le span #}
+						{% set totalItems = 0 %}
+						{% if app.session.get('cart') is defined and app.session.get('cart') is not empty %}
+							{% for item in app.session.get('cart') %}
+								{% set totalItems = totalItems + item %}
+							{% endfor %}
+						{% endif %}
+						<span class="{% if totalItems > 0 %}bg-gold text-white rounded-full px-2 py-0.5 text-xs font-bold{% endif %}">{{ totalItems > 0 ? totalItems : '' }}</span>
 					</a>
 					{# ACCES ADMIN SEULEMENT VERS CET ONGLET #}
 					{% if is_granted('ROLE_ADMIN') %}
@@ -160,7 +167,13 @@
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
 						</svg>
-						<span>(0)</span>
+						{% set totalItems = 0 %}
+						{% if app.session.get('cart') is defined and app.session.get('cart') is not empty %}
+							{% for item in app.session.get('cart') %}
+								{% set totalItems = totalItems + item %}
+							{% endfor %}
+						{% endif %}
+						<span class="{% if totalItems > 0 %}bg-gold text-white rounded-full px-2 py-0.5 text-xs font-bold{% endif %}">{{ totalItems > 0 ? totalItems : '' }}</span>
 					</a>
 
 					{# ACCESS ADMIN SEULEMENT VERS CET ONGLET #}

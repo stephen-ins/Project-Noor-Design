@@ -207,8 +207,8 @@
 								<div class="border-b border-gray-200 pb-2 mb-4">
 									<div class="flex justify-between items-center mb-2">
 										<div>
-											<span class="font-medium">Commande #{{ order.orderNumber }}</span>
-											<span class="text-sm text-gray-500 ml-2">{{ order.orderDate|date('d/m/Y') }}</span>
+											<span class="font-medium">Commande #{{ order.id }}</span>
+											<span class="text-sm text-gray-500 ml-2">{{ order.dateCommande|date('d/m/Y') }}</span>
 										</div>
 										<span class="px-3 py-1 bg-{{ order.status == 'LIVREE' ? 'green' : 'blue' }}-100 text-{{ order.status == 'LIVREE' ? 'green' : 'blue' }}-800 text-xs rounded-full">
 											{{ order.status.value }}
@@ -217,7 +217,7 @@
 									<div class="flex justify-between text-sm">
 										<span class="text-gray-600">{{ order.orderDetails|length }}
 											article(s)</span>
-										<span class="font-medium">{{ order.amount|number_format(2, ',', ' ') }}
+										<span class="font-medium">{{ order.total|number_format(2, ',', ' ') }}
 											€</span>
 									</div>
 									<div class="mt-2">
