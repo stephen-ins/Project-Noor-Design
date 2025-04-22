@@ -30,7 +30,8 @@
 			</h2>
 
 			<p class="text-center text-gray-600 mb-6">
-				Votre commande <strong>#noor-{{ order.dateCommande|date('dmY') }}-{{ order.id }}</strong>
+				Votre commande
+				<strong>#noor-{{ order.dateCommande|date('dmY') }}-{{ order.id }}</strong>
 				a été enregistrée et sera traitée dans les plus brefs délais.
 			</p>
 
@@ -43,6 +44,29 @@
 					<span class="text-gray-600">Statut :</span>
 					<span class="font-medium">{{ order.status.value }}</span>
 				</div>
+
+				{# Afficher le sous-total (sans frais de port) #}
+				{% set subtotal = order.total %}
+				{% if order.shippingFee is defined and order.shippingFee > 0 %}
+					{% set subtotal = order.total - order.shippingFee %}
+				{% endif %}
+
+				<div class="flex justify-between mb-2">
+					<span class="text-gray-600">Sous-total :</span>
+					<span class="font-medium">{{ subtotal|number_format(2, '.', ' ') }}
+						€</span>
+				</div>
+
+				<div class="flex justify-between mb-2">
+					<span class="text-gray-600">Livraison :</span>
+					{% if order.shippingFee is defined and order.shippingFee > 0 %}
+						<span class="font-medium">{{ order.shippingFee|number_format(2, '.', ' ') }}
+							€</span>
+					{% else %}
+						<span class="text-green-600 font-medium">Gratuite</span>
+					{% endif %}
+				</div>
+
 				<div class="flex justify-between">
 					<span class="text-gray-600">Total :</span>
 					<span class="font-medium text-gold">{{ order.total }}

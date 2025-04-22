@@ -114,4 +114,19 @@ final class CartController extends AbstractController
         $session->set('cart', $cart);
         return $this->redirectToRoute('app_panier');
     }
+
+    // Vider complètement le panier
+    #[Route('/cart/clear', name: 'cart_clear')]
+    public function clear(SessionInterface $session): Response
+    {
+        // Supprimer complètement la variable de session 'cart'
+        $session->remove('cart');
+        
+        // Ajouter un message flash de confirmation
+        $this->addFlash('success', 'Votre panier a été vidé avec succès');
+        
+        // Rediriger vers la page du panier
+        return $this->redirectToRoute('app_panier');
+    }
+    
 }

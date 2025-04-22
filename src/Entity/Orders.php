@@ -30,6 +30,9 @@ class Orders
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
     private ?Users $user = null;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $shippingFee = null;
+
     /**
      * @var Collection<int, OrderDetails>
      */
@@ -92,6 +95,18 @@ class Orders
     public function setUser(?Users $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getShippingFee(): ?float
+    {
+        return $this->shippingFee;
+    }
+
+    public function setShippingFee(?float $shippingFee): self
+    {
+        $this->shippingFee = $shippingFee;
 
         return $this;
     }

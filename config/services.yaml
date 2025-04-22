@@ -6,7 +6,7 @@
 parameters:
   products_images_directory: "%kernel.project_dir%/public/uploads/products"
   order_number_format: "#noor-%%s-%%s" # Format: #noor-{date}-{id}
-  locale: 'fr'
+  locale: "fr"
 
 services:
   # default configuration for services in *this* file
