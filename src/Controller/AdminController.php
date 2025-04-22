@@ -6,6 +6,7 @@ use App\Entity\Users;
 use App\Entity\Orders;
 use App\Entity\Products;
 use App\Entity\Categories;
+use App\Entity\Wishlist;
 use App\Enum\OrderStatus;
 use App\Form\CategoryFormType;
 use App\Form\ProductsFormType;
@@ -580,6 +581,40 @@ final class AdminController extends AbstractController
     {
         return $this->render('admin/admin.messages.html.twig', [
             'controller_name' => 'AdminController',
+        ]);
+    }
+    
+    // route pour la gestion des wishlists
+    #[Route('/wish', name: 'app_admin_wish')]
+    public function wishlist(EntityManagerInterface $entityManager): Response
+    {
+        // Récupérer toutes les entrées de wishlists avec leurs relations
+        $wishlistItems = $entityManager->getRepository(Wishlist::class)
+            ->createQueryBuilder('w')
+            ->select('w', 'u', 'p')
+            ->leftJoin('w.user', 'u')
+            ->leftJoin('w.product', 'p')
+            ->orderBy('u.nom', 'ASC')
+            ->addOrderBy('w.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+            
+        // Organiser les données par utilisateur
+        $wishlistsByUser = [];
+        foreach ($wishlistItems as $item) {
+            $userId = $item->getUser()->getId();
+            if (!isset($wishlistsByUser[$userId])) {
+                $wishlistsByUser[$userId] = [
+                    'user' => $item->getUser(),
+                    'items' => []
+                ];
+            }
+            $wishlistsByUser[$userId]['items'][] = $item;
+        }
+
+        return $this->render('admin/admin.wishlist.html.twig', [
+            'controller_name' => 'AdminController',
+            'wishlistsByUser' => $wishlistsByUser
         ]);
     }
 }
