@@ -7,6 +7,7 @@ use App\Repository\ProductsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\WishlistRepository;
 
 final class IndexController extends AbstractController
 {
@@ -60,14 +61,33 @@ final class IndexController extends AbstractController
 
     // route pour la page produit en détail avec l'id du produit et la possibilité de l'ajouter au panier
     #[Route('/produit/{id}', name: 'app_produit')]
-    public function produit(int $id, ProductsRepository $repo): Response
-    {
+    public function produit(
+        int $id,
+        ProductsRepository $repo,
+        WishlistRepository $wishlistRepository
+    ): Response {
         // Récupérer le produit par son ID
         $detailProduit = $repo->find($id);
+
+        if (!$detailProduit) {
+            throw $this->createNotFoundException('Produit non trouvé');
+        }
+
+        // Vérifier si le produit est dans la wishlist de l'utilisateur
+        $isInWishlist = false;
+        if ($this->getUser()) {
+            $wishlistItem = $wishlistRepository->findOneBy([
+                'user' => $this->getUser(),
+                'product' => $detailProduit
+            ]);
+
+            $isInWishlist = $wishlistItem !== null;
+        }
 
         return $this->render('app/produit.html.twig', [
             'controller_name' => 'Produit',
             'detailProduit' => $detailProduit,
+            'is_in_wishlist' => $isInWishlist
         ]);
     }
 

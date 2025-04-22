@@ -16,7 +16,7 @@
 			</h1>
 			<p class="text-lg text-gray-600">
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Est,
-																																																																																																          possimus!
+																																																																																																																																          possimus!
 			</p>
 		</div>
 	</div>
@@ -91,42 +91,52 @@
 						</span>
 					</div>
 
-					<pre>
-          </pre>
+
 					<div class="mt-8 flex items-center">
-						<form action="{{ path('cart_add', {'id': detailProduit.id}) }}" method="POST" class="flex items-center">
-							<div class="mr-4 flex items-center border border-gray-300 rounded-full overflow-hidden">
-								<select name="quantity" class="bg-white border-none focus:outline-none focus:ring-2 focus:ring-gold text-sm px-4 py-2 rounded-full">
-									{% if detailProduit.stock > 0 %}
+						{% if detailProduit.stock > 0 %}
+							<form action="{{ path('cart_add', {'id': detailProduit.id}) }}" method="POST" class="flex items-center">
+								<div class="mr-4 flex items-center border border-gray-300 rounded-full overflow-hidden">
+									<select name="quantity" class="bg-white border-none focus:outline-none focus:ring-2 focus:ring-gold text-sm px-4 py-2 rounded-full">
 										{% for i in 1..detailProduit.stock %}
 											<option value="{{ i }}">{{ i }}</option>
 										{% endfor %}
-									{% else %}
-										<option value="0" disabled selected>Rupture de stock</option>
-									{% endif %}
-								</select>
-							</div>
+									</select>
+								</div>
 
-							{% if detailProduit.stock > 0 %}
 								<button type="submit" class="bg-gold text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition">
 									Ajouter au panier
 								</button>
-							{% else %}
-								<button type="button" disabled class="bg-gray-400 text-white px-6 py-2 rounded-full cursor-not-allowed">
-									Rupture de stock
-								</button>
-							{% endif %}
 
-							<input type="hidden" name="redirect_to_cart" value="0">
-							<input type="hidden" name="_token" value="{{ csrf_token('add_to_cart') }}">
-						</form>
-
-						<div>
-							<button class="bg-gray-200 text-gray-800 px-6 py-2 rounded-full hover:bg-gray-300 transition ml-4">
-								Ajouter à ma wishlist
-							</button>
-						</div>
+								<input type="hidden" name="redirect_to_cart" value="0">
+								<input type="hidden" name="_token" value="{{ csrf_token('add_to_cart') }}">
+							</form>
+						{% else %}
+							<div class="text-red-600 font-medium">
+								Ce produit est actuellement indisponible
+							</div>
+						{% endif %}
 					</div>
+
+					<div class="ml-4 mx-auto mt-10 flex items-center">
+						{% if app.user %}
+							{% if is_in_wishlist %}
+								<a href="{{ path('wishlist_remove', {'id': detailProduit.id}) }}" class="flex items-center text-red-600 hover:text-red-700 transition">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewbox="0 0 20 20" fill="currentColor">
+										<path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+									</svg>
+									Retirer de ma wishlist
+								</a>
+							{% else %}
+								<a href="{{ path('wishlist_add', {'id': detailProduit.id}) }}" class="flex items-center text-gray-600 hover:text-red-600 transition">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+									</svg>
+									Ajouter à ma wishlist
+								</a>
+							{% endif %}
+						{% endif %}
+					</div>
+
 				</div>
 			</div>
 		</div>
