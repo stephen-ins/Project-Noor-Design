@@ -23,11 +23,20 @@
 					<div class="flex justify-between items-center">
 						<div>
 							<h6 class="text-sm font-medium">Ventes</h6>
-							<h3 class="text-2xl font-bold">15 890 €</h3>
+							<h3 class="text-2xl font-bold">{{ totalSales|number_format(2, ',', ' ') }}
+								€</h3>
 						</div>
 						<i class="bi bi-currency-euro text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">+12% ce mois</p>
+					<p class="text-xs mt-2">
+						{% if salesVariation > 0 %}
+							+{{ salesVariation }}% ce mois
+						{% elseif salesVariation < 0 %}
+							{{ salesVariation }}% ce mois
+						{% else %}
+							Stable ce mois
+						{% endif %}
+					</p>
 				</div>
 			</div>
 			<div class="bg-green-600 text-white rounded-lg shadow">
@@ -35,11 +44,12 @@
 					<div class="flex justify-between items-center">
 						<div>
 							<h6 class="text-sm font-medium">Commandes</h6>
-							<h3 class="text-2xl font-bold">128</h3>
+							<h3 class="text-2xl font-bold">{{ totalOrders }}</h3>
 						</div>
 						<i class="bi bi-bag-check text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">32 en attente</p>
+					<p class="text-xs mt-2">{{ pendingOrders }}
+						en attente</p>
 				</div>
 			</div>
 			<div class="bg-cyan-600 text-white rounded-lg shadow">
@@ -47,11 +57,12 @@
 					<div class="flex justify-between items-center">
 						<div>
 							<h6 class="text-sm font-medium">Clients</h6>
-							<h3 class="text-2xl font-bold">845</h3>
+							<h3 class="text-2xl font-bold">{{ totalCustomers }}</h3>
 						</div>
 						<i class="bi bi-people text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">+24 nouveaux</p>
+					<p class="text-xs mt-2">+{{ newCustomers }}
+						nouveaux</p>
 				</div>
 			</div>
 			<div class="bg-yellow-500 text-white rounded-lg shadow">
@@ -59,11 +70,12 @@
 					<div class="flex justify-between items-center">
 						<div>
 							<h6 class="text-sm font-medium">Produits</h6>
-							<h3 class="text-2xl font-bold">254</h3>
+							<h3 class="text-2xl font-bold">{{ totalProducts }}</h3>
 						</div>
 						<i class="bi bi-gem text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">12 en rupture</p>
+					<p class="text-xs mt-2">{{ outOfStockProducts }}
+						en rupture</p>
 				</div>
 			</div>
 		</div>
@@ -72,7 +84,7 @@
 		<div class="bg-white rounded-lg shadow mb-6">
 			<div class="flex justify-between items-center px-6 py-4 border-b">
 				<h5 class="font-semibold">Commandes récentes</h5>
-				<a href="#" class="text-blue-600 text-sm border border-blue-600 rounded px-3 py-1 hover:bg-blue-50">Voir tout</a>
+				<a href="{{ path('app_admin_orders') }}" class="text-blue-600 text-sm border border-blue-600 rounded px-3 py-1 hover:bg-blue-50">Voir tout</a>
 			</div>
 			<div class="p-6">
 				<div class="overflow-x-auto">
@@ -84,9 +96,6 @@
 								</th>
 								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
 									Client
-								</th>
-								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-									Produit
 								</th>
 								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
 									Montant
@@ -103,66 +112,42 @@
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-200">
-							<tr class="hover:bg-gray-50">
-								<td class="px-6 py-4">#CMD-2023</td>
-								<td class="px-6 py-4">Marie Dubois</td>
-								<td class="px-6 py-4">Bague diamant "Étoile"</td>
-								<td class="px-6 py-4">1 250 €</td>
-								<td class="px-6 py-4">
-									<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded">Complétée</span>
-								</td>
-								<td class="px-6 py-4">21/06/2023</td>
-								<td class="px-6 py-4">
-									<button class="border border-gray-300 rounded p-1 hover:bg-gray-100">
-										<i class="bi bi-eye"></i>
-									</button>
-								</td>
-							</tr>
-							<tr class="hover:bg-gray-50">
-								<td class="px-6 py-4">#CMD-2022</td>
-								<td class="px-6 py-4">Pierre Martin</td>
-								<td class="px-6 py-4">Collier en or "Cascade"</td>
-								<td class="px-6 py-4">850 €</td>
-								<td class="px-6 py-4">
-									<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded">En attente</span>
-								</td>
-								<td class="px-6 py-4">20/06/2023</td>
-								<td class="px-6 py-4">
-									<button class="border border-gray-300 rounded p-1 hover:bg-gray-100">
-										<i class="bi bi-eye"></i>
-									</button>
-								</td>
-							</tr>
-							<tr class="hover:bg-gray-50">
-								<td class="px-6 py-4">#CMD-2021</td>
-								<td class="px-6 py-4">Sophie Laurent</td>
-								<td class="px-6 py-4">Bracelet argent "Vague"</td>
-								<td class="px-6 py-4">450 €</td>
-								<td class="px-6 py-4">
-									<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">Expédiée</span>
-								</td>
-								<td class="px-6 py-4">19/06/2023</td>
-								<td class="px-6 py-4">
-									<button class="border border-gray-300 rounded p-1 hover:bg-gray-100">
-										<i class="bi bi-eye"></i>
-									</button>
-								</td>
-							</tr>
-							<tr class="hover:bg-gray-50">
-								<td class="px-6 py-4">#CMD-2020</td>
-								<td class="px-6 py-4">Jean Dupont</td>
-								<td class="px-6 py-4">Boucles d'oreilles "Luna"</td>
-								<td class="px-6 py-4">380 €</td>
-								<td class="px-6 py-4">
-									<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded">Complétée</span>
-								</td>
-								<td class="px-6 py-4">18/06/2023</td>
-								<td class="px-6 py-4">
-									<button class="border border-gray-300 rounded p-1 hover:bg-gray-100">
-										<i class="bi bi-eye"></i>
-									</button>
-								</td>
-							</tr>
+							{% if recentOrders|length > 0 %}
+								{% for order in recentOrders %}
+									<tr class="hover:bg-gray-50">
+										<td class="px-6 py-4">{{ order_number(order) }}</td>
+										<td class="px-6 py-4">{{ order.user.nom }}
+											{{ order.user.prenom }}</td>
+										<td class="px-6 py-4">{{ order.total|number_format(2, ',', ' ') }}
+											€</td>
+										<td class="px-6 py-4">
+											{% if order.status.value == 'livrée' or order.status == constant('App\\Enum\\OrderStatus::LIVREE') %}
+												<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'expédiée' or order.status == constant('App\\Enum\\OrderStatus::EXPEDIEE') %}
+												<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'en attente' or order.status == constant('App\\Enum\\OrderStatus::EN_ATTENTE') %}
+												<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'confirmée' or order.status == constant('App\\Enum\\OrderStatus::CONFIRMEE') %}
+												<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'annulée' or order.status == constant('App\\Enum\\OrderStatus::ANNULEE') %}
+												<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% else %}
+												<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% endif %}
+										</td>
+										<td class="px-6 py-4">{{ order.dateCommande|date('d/m/Y') }}</td>
+										<td class="px-6 py-4">
+											<a href="{{ path('app_admin_order_show', {'id': order.id}) }}" class="border border-gray-300 rounded p-1 hover:bg-gray-100">
+												<i class="bi bi-eye"></i>
+											</a>
+										</td>
+									</tr>
+								{% endfor %}
+							{% else %}
+								<tr>
+									<td colspan="6" class="px-6 py-4 text-center text-gray-500">Aucune commande récente</td>
+								</tr>
+							{% endif %}
 						</tbody>
 					</table>
 				</div>
@@ -176,27 +161,22 @@
 					<h5 class="font-semibold">Produits populaires</h5>
 				</div>
 				<div class="p-6">
-					<div class="flex mb-4">
-						<img src="../../images/products/bague1.jpg" class="mr-4 w-[70px] h-[70px] object-cover rounded" alt="Bague"/>
-						<div>
-							<h6 class="font-medium mb-1">Bague diamant "Étoile"</h6>
-							<p class="text-gray-500 text-sm">1 250 € - 32 vendus</p>
-						</div>
-					</div>
-					<div class="flex mb-4">
-						<img src="../../images/products/collier1.jpg" class="mr-4 w-[70px] h-[70px] object-cover rounded" alt="Collier"/>
-						<div>
-							<h6 class="font-medium mb-1">Collier en or "Cascade"</h6>
-							<p class="text-gray-500 text-sm">850 € - 28 vendus</p>
-						</div>
-					</div>
-					<div class="flex">
-						<img src="../../images/products/bracelet1.jpg" class="mr-4 w-[70px] h-[70px] object-cover rounded" alt="Bracelet"/>
-						<div>
-							<h6 class="font-medium mb-1">Bracelet argent "Vague"</h6>
-							<p class="text-gray-500 text-sm">450 € - 24 vendus</p>
-						</div>
-					</div>
+					{% if popularProducts|length > 0 %}
+						{% for item in popularProducts %}
+							<div class="flex mb-4{% if loop.last %} mb-0{% endif %}">
+								<img src="{{ asset('uploads/products/' ~ item[0].image) }}" class="mr-4 w-[70px] h-[70px] object-cover rounded" alt="{{ item[0].nom }}"/>
+								<div>
+									<h6 class="font-medium mb-1">{{ item[0].nom }}</h6>
+									<p class="text-gray-500 text-sm">{{ item[0].prix|number_format(2, ',', ' ') }}
+										€ -
+										{{ item.total }}
+										vendus</p>
+								</div>
+							</div>
+						{% endfor %}
+					{% else %}
+						<p class="text-gray-500 text-center">Aucune donnée disponible</p>
+					{% endif %}
 				</div>
 			</div>
 			<div class="bg-white rounded-lg shadow">
@@ -205,31 +185,102 @@
 				</div>
 				<div class="p-6">
 					<div class="space-y-4">
-						<div class="flex justify-between items-center">
-							<span>Boucles d'oreilles "Luna"</span>
-							<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">3 en stock</span>
-							<button class="text-blue-600 text-sm border border-blue-600 rounded px-3 py-1 hover:bg-blue-50">
-								Commander
-							</button>
-						</div>
-						<div class="flex justify-between items-center">
-							<span>Bracelet or "Soleil"</span>
-							<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">2 en stock</span>
-							<button class="text-blue-600 text-sm border border-blue-600 rounded px-3 py-1 hover:bg-blue-50">
-								Commander
-							</button>
-						</div>
-						<div class="flex justify-between items-center">
-							<span>Bague saphir "Océan"</span>
-							<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded">5 en stock</span>
-							<button class="text-blue-600 text-sm border border-blue-600 rounded px-3 py-1 hover:bg-blue-50">
-								Commander
-							</button>
-						</div>
+						{% if lowStockProducts|length > 0 %}
+							{% for product in lowStockProducts %}
+								<div class="flex justify-between items-center">
+									<span>{{ product.nom }}</span>
+									<div class="flex items-center">
+										<span class="mr-2 {% if product.stock <= 5 %}text-red-600 font-bold{% else %}text-yellow-600{% endif %}">{{ product.stock }}
+											unités</span>
+										<div class="w-24 bg-gray-200 rounded-full h-2.5">
+											<div class="bg-red-600 h-2.5 rounded-full" style="width: {{ (product.stock / 20) * 100 }}%"></div>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						{% else %}
+							<p class="text-gray-500 text-center">Tous les produits ont un stock suffisant</p>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Graphique des ventes | dernières activités -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+			<div class="bg-white rounded-lg shadow">
+				<div class="px-6 py-4 border-b">
+					<h5 class="font-semibold">Évolution des ventes</h5>
+				</div>
+				<div class="p-6">
+					<canvas id="salesChart" height="200"></canvas>
+				</div>
+			</div>
+			<div class="bg-white rounded-lg shadow">
+				<div class="px-6 py-4 border-b">
+					<h5 class="font-semibold">Activités récentes</h5>
+				</div>
+				<div class="p-6">
+					<div class="space-y-4">
+						{% if recentActivities|length > 0 %}
+							{% for activity in recentActivities %}
+								<div class="flex">
+									<div class="flex-shrink-0 mr-3">
+										<div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+											<i class="bi {{ activity.icon }} text-blue-600"></i>
+										</div>
+									</div>
+									<div>
+										<p class="text-sm font-medium">{{ activity.description }}</p>
+										<p class="text-xs text-gray-500">{{ activity.date|date('d/m/Y H:i') }}</p>
+									</div>
+								</div>
+							{% endfor %}
+						{% else %}
+							<p class="text-gray-500 text-center">Aucune activité récente</p>
+						{% endif %}
 					</div>
 				</div>
 			</div>
 		</div>
 	</main>
+
+	{% block javascripts %}
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<script>
+			document.addEventListener('DOMContentLoaded', function () { // Graphique d'évolution des ventes
+const ctx = document.getElementById('salesChart').getContext('2d');
+const salesChart = new Chart(ctx, {
+type: 'line',
+data: {
+labels: {{ salesChartLabels|json_encode|raw }},
+datasets: [
+{
+label: 'Ventes (€)',
+data: {{ salesChartData|json_encode|raw }},
+backgroundColor: 'rgba(59, 130, 246, 0.2)',
+borderColor: 'rgba(59, 130, 246, 1)',
+borderWidth: 2,
+tension: 0.3
+}
+]
+},
+options: {
+responsive: true,
+scales: {
+y: {
+beginAtZero: true,
+ticks: {
+callback: function (value) {
+return value + ' €';
+}
+}
+}
+}
+}
+});
+});
+		</script>
+	{% endblock %}
 
 {% endblock %}

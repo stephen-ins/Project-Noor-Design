@@ -13,9 +13,93 @@
 		<!-- Header -->
 		<div class="flex justify-between items-center border-b pb-4 mb-6">
 			<h1 class="text-2xl font-semibold">Gestion des Commandes</h1>
-
 		</div>
 
+		<!-- Tableau des commandes -->
+		<div class="bg-white rounded-lg shadow mb-6">
+			<div class="p-6">
+				<div class="overflow-x-auto">
+					<table class="min-w-full">
+						<thead class="bg-gray-50">
+							<tr>
+								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+									Numéro
+								</th>
+								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+									Client
+								</th>
+								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+									Montant
+								</th>
+								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+									Statut
+								</th>
+								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+									Date
+								</th>
+								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+									Actions
+								</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-200">
+							{% if orders|length > 0 %}
+								{% for order in orders %}
+									<tr class="hover:bg-gray-50">
+										<td class="px-6 py-4">{{ order_number(order) }}</td>
+										<td class="px-6 py-4">{{ order.user.nom }}
+											{{ order.user.prenom }}</td>
+										<td class="px-6 py-4">{{ order.total|number_format(2, ',', ' ') }}
+											€</td>
+										<td class="px-6 py-4">
+											{% if order.status.value == 'livrée' or order.status == constant('App\\Enum\\OrderStatus::LIVREE') %}
+												<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'expédiée' or order.status == constant('App\\Enum\\OrderStatus::EXPEDIEE') %}
+												<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'en attente' or order.status == constant('App\\Enum\\OrderStatus::EN_ATTENTE') %}
+												<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'confirmée' or order.status == constant('App\\Enum\\OrderStatus::CONFIRMEE') %}
+												<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% elseif order.status.value == 'annulée' or order.status == constant('App\\Enum\\OrderStatus::ANNULEE') %}
+												<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% else %}
+												<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">{{ order.status.getLabel() }}</span>
+											{% endif %}
+										</td>
+										<td class="px-6 py-4">{{ order.dateCommande|date('d/m/Y') }}</td>
+										<td class="px-6 py-4">
+											<a href="{{ path('app_admin_order_show', {'id': order.id}) }}" class="border border-gray-300 rounded p-1 hover:bg-gray-100">
+												<i class="bi bi-eye"></i>
+											</a>
+
+											<!-- Formulaire pour changer le statut rapidement -->
+											<form method="post" action="{{ path('app_admin_orders_update_status', {'id': order.id}) }}" class="inline-block ml-2">
+												<div class="inline-flex">
+													<select name="status" class="text-xs border border-gray-300 rounded-l py-1 px-2 bg-white">
+														{% for status in ['en_attente', 'confirmée', 'expédiée', 'livrée', 'annulée'] %}
+															<option value="{{ status }}" {% if order.status.value == status %} selected {% endif %}>
+																{{ status|capitalize }}
+															</option>
+														{% endfor %}
+													</select>
+													<button type="submit" class="border border-gray-300 rounded-r p-1 hover:bg-gray-100">
+														<i class="bi bi-check"></i>
+													</button>
+												</div>
+											</form>
+										</td>
+									</tr>
+								{% endfor %}
+							{% else %}
+								<tr>
+									<td colspan="6" class="px-6 py-4 text-center text-gray-500">Aucune commande disponible</td>
+								</tr>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
 
 	</main>
 

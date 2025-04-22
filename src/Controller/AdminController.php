@@ -6,11 +6,13 @@ use App\Entity\Users;
 use App\Entity\Orders;
 use App\Entity\Products;
 use App\Entity\Categories;
+use App\Enum\OrderStatus;
 use App\Form\CategoryFormType;
 use App\Form\ProductsFormType;
 use App\Repository\UsersRepository;
 use App\Repository\ProductsRepository;
 use App\Repository\CategoriesRepository;
+use App\Repository\OrdersRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,21 +20,187 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/admin', name: 'app_admin_')]
+#[Route('/admin')]
+#[IsGranted('ROLE_ADMIN')]
 final class AdminController extends AbstractController
 {
-    // route pour la page d'administration --> main
-    #[Route('', name: 'index')]
-    public function index(): Response
-    {
+    #[Route('/', name: 'app_admin_index')]
+    public function index(
+        OrdersRepository $ordersRepository,
+        ProductsRepository $productsRepository,
+        UsersRepository $UsersRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        // Statistiques des ventes (montant total)
+        $totalSales = $ordersRepository->createQueryBuilder('o')
+            ->select('SUM(o.total)')
+            ->getQuery()
+            ->getSingleScalarResult() ?? 0;
+
+        // Statistiques de ce mois
+        $startOfMonth = new \DateTime('first day of this month');
+        $salesThisMonth = $ordersRepository->createQueryBuilder('o')
+            ->select('SUM(o.total)')
+            ->where('o.date_commande >= :start')
+            ->setParameter('start', $startOfMonth)
+            ->getQuery()
+            ->getSingleScalarResult() ?? 0;
+
+        // Comparaison avec le mois précédent pour calculer la variation
+        $startOfLastMonth = (clone $startOfMonth)->modify('-1 month');
+        $salesLastMonth = $ordersRepository->createQueryBuilder('o')
+            ->select('SUM(o.total)')
+            ->where('o.date_commande >= :start AND o.date_commande < :end')
+            ->setParameter('start', $startOfLastMonth)
+            ->setParameter('end', $startOfMonth)
+            ->getQuery()
+            ->getSingleScalarResult() ?? 0;
+
+        // Calculer la variation en pourcentage
+        $salesVariation = 0;
+        if ($salesLastMonth > 0) {
+            $salesVariation = round((($salesThisMonth - $salesLastMonth) / $salesLastMonth) * 100);
+        }
+
+        // Nombre total de commandes
+        $totalOrders = $ordersRepository->count([]);
+
+        // Commandes en attente (statut "en cours")
+        $pendingOrders = $ordersRepository->count(['status' => 'en cours']);
+
+        // Nombre total de clients
+        $totalCustomers = $UsersRepository->count(['roles' => 'ROLE_USER']);
+
+        // Nouveaux clients ce mois
+        $newCustomers = $UsersRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.creation_date >= :start')
+            ->setParameter('start', $startOfMonth)
+            ->getQuery()
+            ->getSingleScalarResult() ?? 0;
+
+        // Nombre total de produits
+        $totalProducts = $productsRepository->count([]);
+
+        // Produits en rupture de stock
+        $outOfStockProducts = $productsRepository->count(['stock' => 0]);
+
+        // Récupérer les commandes récentes
+        $recentOrders = $ordersRepository->findBy([], ['date_commande' => 'DESC'], 5);
+
+        // Récupérer les produits les plus vendus
+        $popularProducts = $entityManager->createQuery(
+            'SELECT p, SUM(od.quantity) as total
+            FROM App\Entity\Products p
+            JOIN App\Entity\OrderDetails od WITH od.product = p
+            GROUP BY p.id
+            ORDER BY total DESC'
+        )->setMaxResults(5)->getResult();
+
+        // Récupérer les produits avec stock faible
+        $lowStockProducts = $productsRepository->findBy(
+            ['stock' => [1, 2, 3, 4, 5]],
+            ['stock' => 'ASC'],
+            5
+        );
+
+        // Données pour le graphique des ventes (derniers 6 mois)
+        $salesChartData = [];
+        $salesChartLabels = [];
+
+        // Créer des données pour les 6 derniers mois
+        $currentDate = new \DateTime();
+        for ($i = 5; $i >= 0; $i--) {
+            $monthDate = (clone $currentDate)->modify("-$i month");
+            $monthStart = (clone $monthDate)->modify('first day of this month')->setTime(0, 0);
+            $monthEnd = (clone $monthDate)->modify('last day of this month')->setTime(23, 59, 59);
+
+            $monthlySales = $ordersRepository->createQueryBuilder('o')
+                ->select('SUM(o.total)')
+                ->where('o.date_commande BETWEEN :start AND :end')
+                ->setParameter('start', $monthStart)
+                ->setParameter('end', $monthEnd)
+                ->getQuery()
+                ->getSingleScalarResult() ?? 0;
+
+            $salesChartData[] = $monthlySales;
+            $salesChartLabels[] = $monthDate->format('M Y');
+        }
+
+        // Récupérer les activités récentes (commandes, inscriptions, etc.)
+        $recentActivities = [];
+
+        // Dernières commandes (max 20)
+        $latestOrders = $ordersRepository->findBy([], ['date_commande' => 'DESC'], 20);
+        foreach ($latestOrders as $order) {
+            $recentActivities[] = [
+                'icon' => 'bi-bag',
+                'description' => sprintf(
+                    'Commande #CMD-%d de %s %s (%s€)',
+                    $order->getId(),
+                    $order->getUser()->getNom(),
+                    $order->getUser()->getPrenom(),
+                    number_format($order->getTotal(), 2, ',', ' ')
+                ),
+                'date' => $order->getDateCommande()
+            ];
+        }
+
+        // Derniers utilisateurs inscrits (max 20)
+        $latestUsers = $UsersRepository->findBy([], ['creation_date' => 'DESC'], 20);
+        foreach ($latestUsers as $user) {
+            $recentActivities[] = [
+                'icon' => 'bi-person-plus',
+                'description' => sprintf(
+                    'Nouvel utilisateur: %s %s',
+                    $user->getNom(),
+                    $user->getPrenom()
+                ),
+                'date' => $user->getCreationDate()
+            ];
+        }
+
+        // Derniers produits ajoutés (max 20)
+        $latestProducts = $productsRepository->findBy([], ['date_ajout' => 'DESC'], 20);
+        foreach ($latestProducts as $product) {
+            $recentActivities[] = [
+                'icon' => 'bi-box-seam',
+                'description' => sprintf('Nouveau produit: %s', $product->getNom()),
+                'date' => $product->getDateAjout()
+            ];
+        }
+
+        // Trier les activités par date (les plus récentes d'abord)
+        usort($recentActivities, function ($a, $b) {
+            return $b['date'] <=> $a['date'];
+        });
+
+        // Limiter à 20 activités maximum
+        $recentActivities = array_slice($recentActivities, 0, 20);
+
         return $this->render('admin/admin.index.html.twig', [
-            'controller_name' => 'AdminController',
+            'totalSales' => $totalSales,
+            'salesThisMonth' => $salesThisMonth,
+            'salesVariation' => $salesVariation,
+            'totalOrders' => $totalOrders,
+            'pendingOrders' => $pendingOrders,
+            'totalCustomers' => $totalCustomers,
+            'newCustomers' => $newCustomers,
+            'totalProducts' => $totalProducts,
+            'outOfStockProducts' => $outOfStockProducts,
+            'recentOrders' => $recentOrders,
+            'popularProducts' => $popularProducts,
+            'lowStockProducts' => $lowStockProducts,
+            'salesChartData' => $salesChartData,
+            'salesChartLabels' => $salesChartLabels,
+            'recentActivities' => $recentActivities,
         ]);
     }
 
     // route pour la gestion des produits (liste et suppression)
-    #[Route('/products', name: 'products')]
+    #[Route('/products', name: 'app_admin_products')]
     public function products(ProductsRepository $productsRepository, CategoriesRepository $categoriesRepository): Response
     {
         // Récupération de tous les produits
@@ -54,7 +222,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour ajouter un produit
-    #[Route('/products/add', name: 'products_add', methods: ['POST'])]
+    #[Route('/products/add', name: 'app_admin_products_add', methods: ['POST'])]
     public function addProduct(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         // Création d'un nouveau produit
@@ -122,7 +290,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour l'édition d'un produit
-    #[Route('/products/edit/{id}', name: 'products_edit', methods: ['GET', 'POST'])]
+    #[Route('/products/edit/{id}', name: 'app_admin_products_edit', methods: ['GET', 'POST'])]
     public function editProduct(Request $request, Products $product, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         // Sauvegarder l'image actuelle et les images additionnelles
@@ -192,7 +360,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour supprimer un produit
-    #[Route('/products/delete', name: 'products_delete', methods: ['POST'])]
+    #[Route('/products/delete', name: 'app_admin_products_delete', methods: ['POST'])]
     public function deleteProduct(Request $request, EntityManagerInterface $entityManager, ProductsRepository $productsRepository): Response
     {
         // Récupérer l'ID du produit à supprimer depuis la requête
@@ -224,7 +392,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour la gestion des catégories (insertion, modification)    
-    #[Route('/categories', name: 'categories')]
+    #[Route('/categories', name: 'app_admin_categories')]
     public function categories(Request $request, CategoriesRepository $categoriesRepository, EntityManagerInterface $entityManager): Response
     {
         // Récupération de toutes les catégories
@@ -279,7 +447,7 @@ final class AdminController extends AbstractController
     }
 
     // Route pour supprimer une catégorie
-    #[Route('/categories/{id}/delete', name: 'categories_delete', methods: ['POST'])]
+    #[Route('/categories/{id}/delete', name: 'app_admin_categories_delete', methods: ['POST'])]
     public function deleteCategory(Request $request, Categories $category, EntityManagerInterface $entityManager): Response
     {
         // Vérifier le jeton CSRF
@@ -303,7 +471,7 @@ final class AdminController extends AbstractController
 
 
     // route pour la gestion des commandes
-    #[Route('/orders', name: 'orders')]
+    #[Route('/orders', name: 'app_admin_orders')]
     public function orders(EntityManagerInterface $entityManager): Response
     {
         $orders = $entityManager->getRepository(Orders::class)->findBy([], ['date_commande' => 'DESC']);
@@ -315,7 +483,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour voir le détail d'une commande
-    #[Route('/orders/{id}', name: 'orders_detail')]
+    #[Route('/orders/{id}', name: 'app_admin_order_show')]
     public function orderDetail(Orders $order): Response
     {
         return $this->render('admin/admin.order.detail.html.twig', [
@@ -325,27 +493,30 @@ final class AdminController extends AbstractController
     }
 
     // route pour mettre à jour le statut d'une commande
-    #[Route('/orders/{id}/status', name: 'orders_update_status', methods: ['POST'])]
+    #[Route('/orders/{id}/status', name: 'app_admin_orders_update_status', methods: ['POST'])]
     public function updateOrderStatus(Request $request, Orders $order, EntityManagerInterface $entityManager): Response
     {
         $newStatus = $request->request->get('status');
 
-        if ($newStatus && in_array($newStatus, OrderStatus::getValues())) {
-            $order->setStatus(OrderStatus::from($newStatus));
+        try {
+            // Tenter de créer une instance de l'énumération à partir de la valeur
+            $orderStatus = OrderStatus::from($newStatus);
+            $order->setStatus($orderStatus);
             $entityManager->flush();
 
             $this->addFlash('success', 'Le statut de la commande a été mis à jour');
-        } else {
+        } catch (\ValueError $e) {
+            // En cas de valeur invalide
             $this->addFlash('error', 'Statut invalide');
         }
 
-        return $this->redirectToRoute('app_admin_orders_detail', ['id' => $order->getId()]);
+        return $this->redirectToRoute('app_admin_order_show', ['id' => $order->getId()]);
     }
 
 
 
     // route pour la gestion des clients
-    #[Route('/users', name: 'users')]
+    #[Route('/users', name: 'app_admin_users')]
     public function users(UsersRepository $usersRepository): Response
     {
         $users = $usersRepository->findAll();
@@ -356,7 +527,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour modifier les rôles d'un utilisateur
-    #[Route('/users/{id}/edit', name: 'users_edit')]
+    #[Route('/users/{id}/edit', name: 'app_admin_users_edit')]
     public function editUser(Request $request, Users $user, EntityManagerInterface $entityManager): Response
     {
         if ($request->isMethod('POST')) {
@@ -377,7 +548,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour supprimer un utilisateur
-    #[Route('/users/{id}/delete', name: 'users_delete', methods: ['POST'])]
+    #[Route('/users/{id}/delete', name: 'app_admin_users_delete', methods: ['POST'])]
     public function deleteUser(Request $request, Users $user, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
@@ -390,7 +561,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour la gestion des commentaires
-    #[Route('/comments', name: 'comments')]
+    #[Route('/comments', name: 'app_admin_comments')]
     public function comments(): Response
     {
         return $this->render('admin/admin.comments.html.twig', [
@@ -399,7 +570,7 @@ final class AdminController extends AbstractController
     }
 
     // route pour la gestion des messages boite de contact
-    #[Route('/messages', name: 'messages')]
+    #[Route('/messages', name: 'app_admin_messages')]
     public function messages(): Response
     {
         return $this->render('admin/admin.messages.html.twig', [
