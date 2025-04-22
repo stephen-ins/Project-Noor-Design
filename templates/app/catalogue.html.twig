@@ -65,15 +65,17 @@
 			</div>
 		</div>
 
-		<!-- Products Grid -->
+		<!-- Tableau des produits -->
 		<div
 			class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
 			<!-- Affichage des produits de la BDD par tour de boucle -->
 			{% for productDetail in allProducts %}
 				<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
-					<div class="overflow-hidden">
-						<img src="{{ asset('uploads/products/' ~ productDetail.image) }}" alt="{{ productDetail.nom }}" class="w-full h-64 object-cover"/>
+					<div
+						class="overflow-hidden">
+						{# Voir avec la cliente si object-cover conviendrait pour l affichage des photos #}
+						<img src="{{ asset('uploads/products/' ~ productDetail.image) }}" alt="{{ productDetail.nom }}" class="w-full h-80 object-contain"/>
 					</div>
 
 					<div class="product-content flex flex-col flex-grow">
