@@ -1,0 +1,234 @@
+{% extends 'base.admin.html.twig' %}
+
+{% block title %}Noor Design | Détail de commande
+{% endblock %}
+
+{% block content %}
+	<!-- Main content -->
+	<main
+		class="flex-1 p-6">
+		<!-- Header -->
+		<div class="flex justify-between items-center border-b pb-4 mb-6">
+			<div>
+				<h1 class="text-2xl font-semibold">Détail de la commande
+					{{ order_number(order) }}</h1>
+				<p class="text-gray-500 mt-1">Commande passée le
+					{{ order.dateCommande|date('d/m/Y à H:i') }}</p>
+			</div>
+			<div>
+				<a href="{{ path('app_admin_orders') }}" class="flex items-center text-blue-600 hover:text-blue-800">
+					<i class="bi bi-arrow-left mr-2"></i>
+					Retour aux commandes
+				</a>
+			</div>
+		</div>
+
+		<!-- Messages flash -->
+		{% for label, messages in app.flashes %}
+			{% for message in messages %}
+				<div class="mb-4 px-4 py-3 rounded-lg {% if label == 'success' %}bg-green-100 text-green-800{% elseif label == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+					{{ message }}
+				</div>
+			{% endfor %}
+		{% endfor %}
+
+		<!-- Informations principales -->
+		<div
+			class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+			<!-- Détails client -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-lg font-medium mb-4 pb-2 border-b">Client</h2>
+				<div class="space-y-2">
+					<p>
+						<span class="font-medium">Nom:</span>
+						{{ order.user.nom }}
+						{{ order.user.prenom }}</p>
+					<p>
+						<span class="font-medium">Email:</span>
+						{{ order.user.email }}</p>
+					{% if order.user.phone %}
+						<p>
+							<span class="font-medium">Téléphone:</span>
+							{{ order.user.phone }}</p>
+					{% endif %}
+					<p>
+						<span class="font-medium">Adresse:</span>
+						{{ order.user.adresse }},
+						{{ order.user.zipcode }}
+						{{ order.user.ville }},
+						{{ order.user.pays }}
+					</p>
+				</div>
+			</div>
+
+			<!-- Détails commande -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-lg font-medium mb-4 pb-2 border-b">Commande</h2>
+				<div class="space-y-2">
+					<p>
+						<span class="font-medium">Statut:</span>
+						<span class="px-2 py-1 rounded-full text-xs font-medium
+																                            {% if order.status.value == 'livrée' or order.status == constant('App\\Enum\\OrderStatus::LIVREE') %}
+																                                bg-green-100 text-green-800
+																                            {% elseif order.status.value == 'expédiée' or order.status == constant('App\\Enum\\OrderStatus::EXPEDIEE') %}
+																                                bg-blue-100 text-blue-800
+																                            {% elseif order.status.value == 'en attente' or order.status == constant('App\\Enum\\OrderStatus::EN_ATTENTE') %}
+																                                bg-yellow-100 text-yellow-800
+																                            {% elseif order.status.value == 'confirmée' or order.status == constant('App\\Enum\\OrderStatus::CONFIRMEE') %}
+																                                bg-blue-100 text-blue-800
+																                            {% elseif order.status.value == 'annulée' or order.status == constant('App\\Enum\\OrderStatus::ANNULEE') %}
+																                                bg-red-100 text-red-800
+																                            {% else %}
+																                                bg-gray-100 text-gray-800
+																                            {% endif %}">
+							{{ order.status.getLabel() }}
+						</span>
+					</p>
+					<p>
+						<span class="font-medium">Date:</span>
+						{{ order.dateCommande|date('d/m/Y à H:i') }}</p>
+
+					{# Calcul du sous-total sans frais de port #}
+					{% set subtotal = order.total %}
+					{% if order.shippingFee is defined and order.shippingFee > 0 %}
+						{% set subtotal = order.total - order.shippingFee %}
+					{% endif %}
+
+					<p>
+						<span class="font-medium">Sous-total:</span>
+						{{ subtotal|number_format(2, ',', ' ') }}
+						€</p>
+					<p>
+						<span class="font-medium">Frais de livraison:</span>
+						{% if order.shippingFee is defined and order.shippingFee > 0 %}
+							{{ order.shippingFee|number_format(2, ',', ' ') }}
+							€
+						{% else %}
+							<span class="text-green-600">Gratuit</span>
+						{% endif %}
+					</p>
+					<p class="font-medium text-lg">Total:
+						{{ order.total|number_format(2, ',', ' ') }}
+						€</p>
+				</div>
+			</div>
+
+			<!-- Actions -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-lg font-medium mb-4 pb-2 border-b">Actions</h2>
+				<form method="post" action="{{ path('app_admin_orders_update_status', {'id': order.id}) }}" class="mb-4">
+					<div class="mb-4">
+						<label for="status" class="block mb-2 text-sm font-medium">Mettre à jour le statut:</label>
+						<select name="status" id="status" class="w-full p-2 border rounded">
+							{% for status in ['en_attente', 'confirmée', 'expédiée', 'livrée', 'annulée'] %}
+								<option value="{{ status }}" {% if order.status.value == status %} selected {% endif %}>
+									{{ status|capitalize }}
+								</option>
+							{% endfor %}
+						</select>
+					</div>
+					<button type="submit" class="w-full bg-amber-600 text-white rounded px-4 py-2 hover:bg-amber-700 transition">
+						Mettre à jour
+					</button>
+				</form>
+
+				<div class="mt-6">
+					<a href="mailto:{{ order.user.email }}" class="flex items-center justify-center text-amber-600 hover:text-amber-900 mb-2">
+						<i class="bi bi-envelope mr-2"></i>
+						Contacter le client
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Produits commandés -->
+		<div class="bg-white rounded-lg shadow mb-6">
+			<div class="p-6">
+				<h2 class="text-lg font-medium mb-4">Produits commandés</h2>
+				<div class="overflow-x-auto">
+					<table class="min-w-full divide-y divide-gray-200">
+						<thead class="bg-gray-50">
+							<tr>
+								<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produit</th>
+								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Prix unitaire</th>
+								<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Quantité</th>
+								<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+							</tr>
+						</thead>
+						<tbody class="bg-white divide-y divide-gray-200">
+							{% for detail in order.orderDetails %}
+								<tr>
+									<td class="px-6 py-4">
+										<div class="flex items-center">
+											<img src="{{ asset('uploads/products/' ~ detail.product.image) }}" alt="{{ detail.product.nom }}" class="w-12 h-12 object-cover rounded mr-4">
+											<div>
+												<p class="font-medium text-gray-900">{{ detail.product.nom }}</p>
+												<p class="text-sm text-gray-500">Réf:
+													{{ detail.product.id }}</p>
+											</div>
+										</div>
+									</td>
+									<td class="px-6 py-4 text-center">{{ detail.prix|number_format(2, ',', ' ') }}
+										€</td>
+									<td class="px-6 py-4 text-center">{{ detail.quantity }}</td>
+									<td class="px-6 py-4 text-right font-medium">{{ (detail.prix * detail.quantity)|number_format(2, ',', ' ') }}
+										€</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+						<tfoot>
+							<tr class="bg-gray-50">
+								<td colspan="3" class="px-6 py-4 text-right font-medium">Sous-total:</td>
+								<td class="px-6 py-4 text-right font-medium">{{ subtotal|number_format(2, ',', ' ') }}
+									€</td>
+							</tr>
+							<tr class="bg-gray-50">
+								<td colspan="3" class="px-6 py-4 text-right font-medium">Frais de livraison:</td>
+								<td class="px-6 py-4 text-right font-medium">
+									{% if order.shippingFee is defined and order.shippingFee > 0 %}
+										{{ order.shippingFee|number_format(2, ',', ' ') }}
+										€
+									{% else %}
+										<span class="text-green-600">Gratuit</span>
+									{% endif %}
+								</td>
+							</tr>
+							<tr class="bg-gray-100">
+								<td colspan="3" class="px-6 py-4 text-right font-medium text-lg">Total:</td>
+								<td class="px-6 py-4 text-right font-medium text-lg">{{ order.total|number_format(2, ',', ' ') }}
+									€</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Historique des statuts (à implémenter si nécessaire) -->
+		<!-- 
+				        <div class="bg-white rounded-lg shadow">
+				            <div class="p-6">
+				                <h2 class="text-lg font-medium mb-4">Historique des statuts</h2>
+				                <div class="flow-root">
+				                    <ul class="-mb-8">
+				                        <li class="relative pb-8">
+				                            <div class="relative flex space-x-3">
+				                                <div class="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
+				                                    <i class="bi bi-check-lg text-green-600"></i>
+				                                </div>
+				                                <div class="flex-1 space-y-1">
+				                                    <div class="flex items-center justify-between">
+				                                        <h3 class="text-sm font-medium">Commandé</h3>
+				                                        <time class="text-sm text-gray-500">{{ order.dateCommande|date('d/m/Y à H:i') }}</time>
+				                                    </div>
+				                                    <p class="text-sm text-gray-500">Commande passée par le client</p>
+				                                </div>
+				                            </div>
+				                        </li>
+				                    </ul>
+				                </div>
+				            </div>
+				        </div>
+				        -->
+	</main>
+{% endblock %}

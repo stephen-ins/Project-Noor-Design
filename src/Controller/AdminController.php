@@ -68,10 +68,15 @@ final class AdminController extends AbstractController
         $totalOrders = $ordersRepository->count([]);
 
         // Commandes en attente (statut "en cours")
-        $pendingOrders = $ordersRepository->count(['status' => 'en cours']);
+        $pendingOrders = $ordersRepository->count(['status' => OrderStatus::EN_ATTENTE]);
 
         // Nombre total de clients
-        $totalCustomers = $UsersRepository->count(['roles' => 'ROLE_USER']);
+        $totalCustomers = $UsersRepository->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_USER%')
+            ->getQuery()
+            ->getSingleScalarResult();
 
         // Nouveaux clients ce mois
         $newCustomers = $UsersRepository->createQueryBuilder('u')
@@ -103,7 +108,7 @@ final class AdminController extends AbstractController
         $lowStockProducts = $productsRepository->findBy(
             ['stock' => [1, 2, 3, 4, 5]],
             ['stock' => 'ASC'],
-            5
+            10
         );
 
         // Données pour le graphique des ventes (derniers 6 mois)
