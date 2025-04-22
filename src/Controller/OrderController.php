@@ -23,6 +23,7 @@ class OrderController extends AbstractController
         ProductsRepository $productsRepository,
         EntityManagerInterface $entityManager
     ): Response {
+        // Récupérer le panier
         $cart = $session->get('cart', []);
 
         // Vérifier si le panier n'est pas vide
@@ -31,13 +32,35 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('app_panier');
         }
 
+        // Calculer le total
+        $total = 0;
+        foreach ($cart as $id => $quantity) {
+            $product = $productsRepository->find($id);
+            if ($product) {
+                $total += $product->getPrix() * $quantity;
+            }
+        }
+
+        // Ajouter les frais de livraison si le total est inférieur à 100€
+        $shippingFee = 0;
+        if ($total < 100) {
+            $shippingFee = 5.90;
+        }
+
+        $totalWithShipping = $total + $shippingFee;
+
         // Créer la commande
         $order = new Orders();
         $order->setUser($this->getUser());
         $order->setDateCommande(new \DateTimeImmutable());
+        $order->setTotal($totalWithShipping); // Total avec frais de port
         $order->setStatus(OrderStatus::EN_ATTENTE);
 
-        $total = 0;
+        // Ajouter une information sur les frais de livraison
+        if (method_exists($order, 'setShippingFee')) {
+            $order->setShippingFee($shippingFee);
+        }
+
         $stockError = false;
 
         // Ajouter les produits à la commande
@@ -68,9 +91,6 @@ class OrderController extends AbstractController
             // Ajouter le détail à la commande
             $order->addOrderDetail($orderDetail);
 
-            // Mettre à jour le total
-            $total += $product->getPrix() * $quantity;
-
             $entityManager->persist($orderDetail);
             $entityManager->persist($product);
         }
@@ -80,8 +100,7 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('app_panier');
         }
 
-        // Définir le total et persister la commande
-        $order->setTotal((string)$total);
+        // Persister la commande
         $entityManager->persist($order);
 
         try {

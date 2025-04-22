@@ -27,11 +27,11 @@ class AppExtension extends AbstractExtension
     {
         $dateFormat = $order->getDateCommande()->format('dmY');
         $orderId = $order->getId();
-        
+
         // Récupérer le format mais enlever les balises HTML éventuelles
         $format = $this->parameterBag->get('order_number_format');
         $format = strip_tags($format);
-        
+
         return sprintf(
             $format,
             $dateFormat,

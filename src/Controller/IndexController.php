@@ -71,13 +71,12 @@ final class IndexController extends AbstractController
         ]);
     }
 
-    // route pour la page connexion
+
+    // Modifiez cette méthode pour rediriger vers la route de login existante
     #[Route('/connexion', name: 'app_connexion')]
     public function connexion(): Response
     {
-        return $this->render('app/connexion.html.twig', [
-            'controller_name' => 'Connexion',
-        ]);
+        return $this->redirectToRoute('app_login');
     }
 
     // route pour la page contact

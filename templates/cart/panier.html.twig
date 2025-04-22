@@ -133,8 +133,12 @@
 							<div class="flex justify-between py-2 border-b border-gray-200">
 								<span class="text-gray-600">Livraison</span>
 								<span class="font-medium text-gray-800" id="shipping">
-									<span class="text-green-600">Gratuite</span>
-									<span class="text-xs text-gray-500 block">Dès 100€ d'achat</span>
+									{% if total >= 100 %}
+										<span class="text-green-600">Gratuite</span>
+									{% else %}
+										<span>5,90 €</span>
+										<span class="text-xs text-gray-500 block">Gratuite dès 100€ d'achat</span>
+									{% endif %}
 								</span>
 							</div>
 
@@ -146,8 +150,14 @@
 
 							<div class="flex justify-between py-2 border-t border-gray-300">
 								<span class="font-semibold text-gray-800">Total</span>
-								<span class="font-bold text-xl text-gold" id="total">{{ total|number_format(2, '.', ' ') }}
-									€</span>
+								<span class="font-bold text-xl text-gold" id="total">
+									{% if total >= 100 %}
+										{{ total|number_format(2, '.', ' ') }}
+									{% else %}
+										{{ (total + 5.90)|number_format(2, '.', ' ') }}
+									{% endif %}
+									€
+								</span>
 							</div>
 
 							{% if app.user %}
@@ -160,19 +170,49 @@
 								</a>
 							{% endif %}
 
-							<div class="flex justify-center mt-4">
+							<div class="flex justify-between mt-8">
 								<a href="{{ path('app_catalogue') }}" class="text-gold hover:underline flex items-center">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
 									</svg>
 									Continuer mes achats
 								</a>
+
+								{% if items|length > 0 %}
+									<a href="javascript:void(0)" onclick="openClearCartModal()" class="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+										</svg>
+										Vider le panier
+									</a>
+								{% endif %}
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		{% endif %}
+	</div>
+
+	<!-- Modale de confirmation pour vider le panier -->
+	<div id="clearCartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+		<div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+			<div class="text-center mb-6">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-red-500 mb-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+				</svg>
+				<h3 class="text-xl font-semibold text-gray-800">Vider votre panier</h3>
+				<p class="text-gray-600 mt-2">Êtes-vous sûr de vouloir vider votre panier ? Cette action est irréversible.</p>
+			</div>
+			<div class="flex justify-center space-x-4">
+				<button onclick="closeClearCartModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition">
+					Annuler
+				</button>
+				<a href="{{ path('cart_clear') }}" class="px-4 py-2 bg-red-500 rounded-md text-white hover:bg-red-600 transition">
+					Vider le panier
+				</a>
+			</div>
+		</div>
 	</div>
 
 {% endblock %}
@@ -196,5 +236,32 @@ input.value = parseInt(input.value) + 1;
 input.form.submit();
 }
 }
+
+// Fonction pour ouvrir la modale de confirmation
+function openClearCartModal() {
+document.getElementById('clearCartModal').classList.remove('hidden');
+document.body.classList.add('overflow-hidden'); // Empêche le défilement du corps
+}
+
+// Fonction pour fermer la modale
+function closeClearCartModal() {
+document.getElementById('clearCartModal').classList.add('hidden');
+document.body.classList.remove('overflow-hidden');
+}
+
+// Fermer la modale si l'utilisateur clique en dehors
+document.addEventListener('click', function (event) {
+const modal = document.getElementById('clearCartModal');
+if (event.target === modal) {
+closeClearCartModal();
+}
+});
+
+// Fermer la modale avec la touche Echap
+document.addEventListener('keydown', function (event) {
+if (event.key === 'Escape' && !document.getElementById('clearCartModal').classList.contains('hidden')) {
+closeClearCartModal();
+}
+});
 	</script>
 {% endblock %}
