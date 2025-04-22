@@ -68,13 +68,14 @@
 										</td>
 										<td class="px-6 py-4">{{ order.dateCommande|date('d/m/Y') }}</td>
 										<td class="px-6 py-4">
-											<a href="{{ path('app_admin_order_show', {'id': order.id}) }}" class="border border-gray-300 rounded p-1 hover:bg-gray-100">
-												<i class="bi bi-eye"></i>
-											</a>
+											<div class="flex items-center space-x-2">
+												<a href="{{ path('app_admin_order_show', {'id': order.id}) }}" class="flex items-center space-x-1 bg-blue-50 text-blue-600 border border-blue-300 rounded px-2 py-1 hover:bg-blue-100 transition-colors">
+													<i class="bi bi-eye" title="Consulter la commande"></i>
+													<span class="text-xs font-medium">Consulter</span>
+												</a>
 
-											<!-- Formulaire pour changer le statut rapidement -->
-											<form method="post" action="{{ path('app_admin_orders_update_status', {'id': order.id}) }}" class="inline-block ml-2">
-												<div class="inline-flex">
+												<!-- Formulaire pour changer le statut rapidement -->
+												<form method="post" action="{{ path('app_admin_orders_update_status', {'id': order.id}) }}" class="inline-flex">
 													<select name="status" class="text-xs border border-gray-300 rounded-l py-1 px-2 bg-white">
 														{% for status in ['en_attente', 'confirmée', 'expédiée', 'livrée', 'annulée'] %}
 															<option value="{{ status }}" {% if order.status.value == status %} selected {% endif %}>
@@ -82,11 +83,11 @@
 															</option>
 														{% endfor %}
 													</select>
-													<button type="submit" class="border border-gray-300 rounded-r p-1 hover:bg-gray-100">
-														<i class="bi bi-check"></i>
+													<button type="submit" class="border border-gray-300 rounded-r p-1 hover:bg-gray-400">
+														<i class="bi bi-check" title="Mettre à jour le statut"></i>
 													</button>
-												</div>
-											</form>
+												</form>
+											</div>
 										</td>
 									</tr>
 								{% endfor %}

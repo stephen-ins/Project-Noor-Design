@@ -129,8 +129,14 @@ class OrderController extends AbstractController
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette commande');
         }
 
+        // Générer le numéro de commande avec le format défini dans services.yaml
+        $orderNumberFormat = $this->getParameter('order_number_format');
+        $orderDate = $order->getDateCommande()->format('Ymd');
+        $orderNumber = sprintf($orderNumberFormat, $orderDate, $order->getId());
+
         return $this->render('order/confirmation.html.twig', [
-            'order' => $order
+            'order' => $order,
+            'order_number' => $orderNumber
         ]);
     }
 
@@ -140,7 +146,14 @@ class OrderController extends AbstractController
     public function orderHistory(): Response
     {
         $user = $this->getUser();
-        $orders = $user->getOrders();
+
+        // Récupérer les commandes de l'utilisateur triées par date décroissante
+        $orders = $user->getOrders()->toArray();
+
+        // Trier les commandes par date (de la plus récente à la plus ancienne)
+        usort($orders, function ($a, $b) {
+            return $b->getDateCommande() <=> $a->getDateCommande();
+        });
 
         return $this->render('order/history.html.twig', [
             'orders' => $orders
