@@ -1,0 +1,114 @@
+{% extends 'base.admin.html.twig' %}
+
+{% block title %}Noor Design | Admin - Listes de Souhaits
+{% endblock %}
+
+{# AFFICHAGE DE LA PAGE ADMINISTRATION DU SITE --> LISTES DE SOUHAITS #}
+
+{% block content %}
+	<!-- Main content -->
+	<main
+		class="flex-1 p-6">
+		<!-- Header -->
+		<div class="flex justify-between items-center border-b pb-4 mb-6">
+			<h1 class="text-2xl font-semibold">Gestion des Listes de Souhaits</h1>
+		</div>
+
+		<!-- Message d'erreur ou de succès -->
+		{% if app.session.flashBag.has('success') %}
+			<div class="bg-green-100 text-green-800 p-4 rounded-lg mb-6">
+				{{ app.session.flashBag.get('success')[0] }}
+			</div>
+		{% endif %}
+		{% if app.session.flashBag.has('error') %}
+			<div class="bg-red-100 text-red-800 p-4 rounded-lg mb-6">
+				{{ app.session.flashBag.get('error')[0] }}
+			</div>
+		{% endif %}
+
+		<!-- Statistiques -->
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+			<div class="bg-white p-4 rounded-lg shadow-sm">
+				<h3 class="text-lg font-medium mb-2">Total des Utilisateurs avec Wishlists</h3>
+				<p class="text-3xl font-bold text-amber-600">{{ wishlistsByUser|length }}</p>
+			</div>
+
+			<div class="bg-white p-4 rounded-lg shadow-sm">
+				<h3 class="text-lg font-medium mb-2">Total des Produits en Wishlist</h3>
+				{% set totalProducts = 0 %}
+				{% for userWishlist in wishlistsByUser %}
+					{% set totalProducts = totalProducts + userWishlist.items|length %}
+				{% endfor %}
+				<p class="text-3xl font-bold text-amber-600">{{ totalProducts }}</p>
+			</div>
+
+			<div class="bg-white p-4 rounded-lg shadow-sm">
+				<h3 class="text-lg font-medium mb-2">Moyenne de Produits par Utilisateur</h3>
+				{% if wishlistsByUser|length > 0 %}
+					{% set average = (totalProducts / wishlistsByUser|length)|round(1) %}
+				{% else %}
+					{% set average = 0 %}
+				{% endif %}
+				<p class="text-3xl font-bold text-amber-600">{{ average }}</p>
+			</div>
+		</div>
+
+		<!-- Liste des Wishlists -->
+		{% if wishlistsByUser|length > 0 %}
+			{% for userId, userWishlist in wishlistsByUser %}
+				<div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+					<div class="bg-gray-100 p-4 border-b">
+						<h3 class="text-lg font-medium">
+							<i class="bi bi-person-circle mr-2"></i>
+							{{ userWishlist.user.prenom }}
+							{{ userWishlist.user.nom }}
+							<span class="text-sm text-gray-500 ml-2">({{ userWishlist.user.email }})</span>
+						</h3>
+					</div>
+
+					<table class="w-full text-left">
+						<thead class="bg-gray-50 border-b">
+							<tr>
+								<th class="px-6 py-3">Image</th>
+								<th class="px-6 py-3">Produit</th>
+								<th class="px-6 py-3">Prix</th>
+								<th class="px-6 py-3">Catégorie</th>
+								<th class="px-6 py-3">En Stock</th>
+								<th class="px-6 py-3">Date d'ajout</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for item in userWishlist.items %}
+								<tr class="border-b hover:bg-gray-50">
+									<td class="px-6 py-4">
+										<img src="{{ asset('uploads/products/' ~ item.product.image) }}" alt="{{ item.product.nom }}" class="w-16 h-16 object-cover rounded"/>
+									</td>
+									<td class="px-6 py-4 font-medium">
+										{{ item.product.nom }}
+									</td>
+									<td class="px-6 py-4">{{ item.product.prix }}
+										€</td>
+									<td class="px-6 py-4">{{ item.product.categorie.nom }}</td>
+									<td class="px-6 py-4">
+										{% if item.product.stock > 0 %}
+											<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">En stock ({{ item.product.stock }})</span>
+										{% else %}
+											<span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Épuisé</span>
+										{% endif %}
+									</td>
+									<td class="px-6 py-4">{{ item.createdAt|date('d/m/Y H:i') }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			{% endfor %}
+		{% else %}
+			<div class="bg-white p-8 rounded-lg shadow-sm text-center">
+				<i class="bi bi-heart text-4xl text-gray-400 mb-2"></i>
+				<p class="text-xl font-medium text-gray-600">Aucune liste de souhaits trouvée</p>
+				<p class="text-gray-500 mt-2">Les clients n'ont pas encore ajouté de produits à leurs listes de souhaits.</p>
+			</div>
+		{% endif %}
+	</main>
+{% endblock %}
