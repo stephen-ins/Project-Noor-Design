@@ -44,7 +44,7 @@ class OrderController extends AbstractController
         // Ajouter les frais de livraison si le total est inférieur à 100€
         $shippingFee = 0;
         if ($total < 100) {
-            $shippingFee = 5.90;
+            $shippingFee = 5.25;
         }
 
         $totalWithShipping = $total + $shippingFee;

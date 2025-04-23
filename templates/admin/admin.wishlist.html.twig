@@ -57,12 +57,18 @@
 		{% if wishlistsByUser|length > 0 %}
 			{% for userId, userWishlist in wishlistsByUser %}
 				<div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-					<div class="bg-gray-100 p-4 border-b">
+					<div class="bg-gray-100 px-4 py-1 border-b">
 						<h3 class="text-lg font-medium">
 							<i class="bi bi-person-circle mr-2"></i>
 							{{ userWishlist.user.prenom }}
 							{{ userWishlist.user.nom }}
 							<span class="text-sm text-gray-500 ml-2">({{ userWishlist.user.email }})</span>
+							<span class="ml-4">
+								<a href="mailto:{{ userWishlist.user.email }}" class=" px-4 inline-flex items-center text-amber-600 hover:text-amber-900">
+									<i class="bi bi-envelope mr-2"></i>
+									Contacter le client
+								</a>
+							</span>
 						</h3>
 					</div>
 
@@ -71,7 +77,7 @@
 							<tr>
 								<th class="px-6 py-3">Image</th>
 								<th class="px-6 py-3">Produit</th>
-								<th class="px-6 py-3">Prix</th>
+								<th class="px-6 py-3">Prix TTC</th>
 								<th class="px-6 py-3">Catégorie</th>
 								<th class="px-6 py-3">En Stock</th>
 								<th class="px-6 py-3">Date d'ajout</th>

@@ -387,8 +387,8 @@ final class AdminController extends AbstractController
 
                 $this->addFlash('success', 'Le produit a été supprimé avec succès.');
             } catch (\Exception $e) {
-                // Si une contrainte d'intégrité est violée (par exemple, le produit est utilisé par des commandes)
-                $this->addFlash('error', 'Impossible de supprimer ce produit car il est utilisé par des commandes.');
+                // Si une contrainte d'intégrité est violée (par exemple, le produit est lié à une/des commandes)
+                $this->addFlash('error', 'Impossible de supprimer ce produit car il est lié à au moins une commande.');
             }
         } else {
             $this->addFlash('error', 'Jeton de sécurité invalide.');
@@ -466,7 +466,7 @@ final class AdminController extends AbstractController
                 $this->addFlash('success', 'La catégorie a été supprimée avec succès.');
             } catch (\Exception $e) {
                 // Si une contrainte d'intégrité est violée (par exemple, la catégorie est utilisée par des produits)
-                $this->addFlash('error', 'Impossible de supprimer cette catégorie car elle est utilisée par des produits.');
+                $this->addFlash('error', 'Impossible de supprimer cette catégorie car elle est liée à au moins un produit.');
             }
         } else {
             $this->addFlash('error', 'Jeton de sécurité invalide.');
@@ -583,7 +583,7 @@ final class AdminController extends AbstractController
             'controller_name' => 'AdminController',
         ]);
     }
-    
+
     // route pour la gestion des wishlists
     #[Route('/wish', name: 'app_admin_wish')]
     public function wishlist(EntityManagerInterface $entityManager): Response
@@ -598,7 +598,7 @@ final class AdminController extends AbstractController
             ->addOrderBy('w.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
-            
+
         // Organiser les données par utilisateur
         $wishlistsByUser = [];
         foreach ($wishlistItems as $item) {

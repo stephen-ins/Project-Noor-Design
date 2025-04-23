@@ -59,7 +59,7 @@
 				{% set subtotalHT = subtotal * 0.8 %}
 				{% set subtotalTVA = subtotal - subtotalHT %}
 
-				<div class="flex justify-between mb-2">
+				<div class="flex justify-between mt-5 border-t mb-2">
 					<span class="text-gray-600">Sous-total HT :</span>
 					<span class="font-medium">{{ subtotalHT|number_format(2, '.', ' ') }}
 						€</span>
@@ -71,8 +71,14 @@
 						€</span>
 				</div>
 
+				<div class="flex bg-gray-100 border-t justify-between mt-5 my-2">
+					<span class="text-gray-600">Sous-total TTC :</span>
+					<span class="font-medium">{{ subtotal|number_format(2, '.', ' ') }}
+						€</span>
+				</div>
+
 				{% if order.shippingFee is defined and order.shippingFee > 0 %}
-					<div class="flex justify-between mb-2">
+					<div class="flex border-t justify-between mt-5 mb-2">
 						<span class="text-gray-600">Livraison HT :</span>
 						<span class="font-medium">{{ shippingHT|number_format(2, '.', ' ') }}
 							€</span>
@@ -84,7 +90,7 @@
 							€</span>
 					</div>
 
-					<div class="flex justify-between mb-2">
+					<div class="flex bg-gray-100 justify-between mb-2">
 						<span class="text-gray-600">Livraison TTC :</span>
 						<span class="font-medium">{{ shippingTTC|number_format(2, '.', ' ') }}
 							€</span>
@@ -96,15 +102,9 @@
 					</div>
 				{% endif %}
 
-				<div class="flex justify-between mb-2">
-					<span class="text-gray-600">Sous-total TTC :</span>
-					<span class="font-medium">{{ subtotal|number_format(2, '.', ' ') }}
-						€</span>
-				</div>
-
-				<div class="flex justify-between">
-					<span class="text-gray-600">Total TTC :</span>
-					<span class="font-medium text-gold">{{ order.total }}
+				<div class="flex bg-red-100 border-t justify-between my-2">
+					<span class="text-gray-700 font-medium text-lg">Total TTC :</span>
+					<span class="font-bold text-xl text-amber-600">{{ order.total|number_format(2, '.', ' ') }}
 						€</span>
 				</div>
 			</div>
