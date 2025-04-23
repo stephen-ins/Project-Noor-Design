@@ -60,9 +60,9 @@
 						<thead>
 							<tr class="bg-gray-100 text-gray-600">
 								<th class="py-3 px-4 text-left">Produit</th>
-								<th class="py-3 px-4 text-center">Prix unitaire</th>
+								<th class="py-3 px-4 text-center">Prix unitaire HT</th>
 								<th class="py-3 px-4 text-center">Quantité</th>
-								<th class="py-3 px-4 text-center">Total</th>
+								<th class="py-3 px-4 text-center">Total HT</th>
 								<th class="py-3 px-4 text-center">Action</th>
 							</tr>
 						</thead>
@@ -80,7 +80,7 @@
 										</div>
 									</td>
 									<td class="py-4 px-4 text-center">
-										<span class="text-gray-700">{{ item.product.prix }}
+										<span class="text-gray-700">{{ (item.product.prix * 0.8)|number_format(2, '.', ' ') }}
 											€</span>
 									</td>
 									<td class="py-4 px-4 text-center">
@@ -99,15 +99,17 @@
 										</div>
 									</td>
 									<td class="py-4 px-4 text-center font-medium product-total">
-										{{ (item.product.prix * item.quantity)|number_format(2, '.', ' ') }}
+										{{ (item.product.prix * 0.8 * item.quantity)|number_format(2, '.', ' ') }}
 										€
 									</td>
 									<td class="py-4 px-4 text-center">
-										<a href="{{ path('cart_remove', {'id': item.product.id}) }}" class="text-red-500 hover:text-red-700 transition remove-item">
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-											</svg>
-										</a>
+										<div class="flex justify-center items-center">
+											<a href="{{ path('cart_remove', {'id': item.product.id}) }}" class="text-red-500 hover:text-red-700 transition remove-item">
+												<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+												</svg>
+											</a>
+										</div>
 									</td>
 								</tr>
 							{% endfor %}
@@ -126,101 +128,108 @@
 							</h3>
 
 							<div class="flex justify-between py-2 border-b border-gray-200">
-								<span class="text-gray-600">Sous-total</span>
-								<span class="font-medium text-gray-800" id="subtotal">{{ total|number_format(2, '.', ' ') }}
+								<span class="text-gray-600">Sous-total HT</span>
+								<span class="font-medium text-gray-800" id="subtotal">{{ (total * 0.8)|number_format(2, '.', ' ') }}
 									€</span>
 							</div>
 							<div class="flex justify-between py-2 border-b border-gray-200">
-								<span class="text-gray-600">Livraison</span>
-								<span class="font-medium text-gray-800" id="shipping">
-									{% if total >= 100 %}
-										<span class="text-green-600 text-right block">Gratuite</span>
-									{% else %}
-										<span>5,25 €</span>
-										<span class="text-xs text-gray-500 block">Gratuite dès 100€ d'achat</span>
-									{% endif %}
-								</span>
-							</div>
 
-							<div class="flex justify-between py-2 mb-4">
-								<span class="text-gray-600">TVA (20%)</span>
+
+								<span class="text-gray-600">TVA produit (20%)</span>
 								<span class="font-medium text-gray-800" id="tax">{{ (total * 0.2)|number_format(2, '.', ' ') }}
 									€</span>
-							</div>
 
-							<div class="flex justify-between py-2 border-t border-gray-300">
-								<span class="font-semibold text-gray-800">Total</span>
-								<span class="font-bold text-xl text-gold" id="total">
-									{% if total >= 100 %}
-										{{ total|number_format(2, '.', ' ') }}
-									{% else %}
-										{{ (total + 5.90)|number_format(2, '.', ' ') }}
-									{% endif %}
-									€
-								</span>
-							</div>
+							</span>
+						</div>
 
-							{% if app.user %}
-								<a href="{{ path('create_order') }}" class="w-full bg-gold text-white py-3 rounded-full mt-6 hover:bg-yellow-600 transition flex items-center justify-center">
-									Procéder au paiement
-								</a>
-							{% else %}
-								<a href="{{ path('app_connexion') }}" class="w-full bg-gold text-white py-3 rounded-full mt-6 hover:bg-yellow-600 transition flex items-center justify-center">
-									Se connecter pour commander
+						<div class="flex justify-between py-2 ">
+							<span class="text-gray-600">Livraison</span>
+							<span class="font-medium text-gray-800" id="shipping">
+								{% if total >= 100 %}
+									<span class="text-green-600 text-right block">Gratuite</span>
+								{% else %}
+									<span>4,20 €</span>
+									<span class="text-xs text-gray-500 block">Gratuite dès 100€ d'achat</span>
+								{% endif %}
+							</span>
+						</div>
+
+						{% if total < 100 %}
+							<div class="flex justify-between py-2 border-b border-gray-200">
+								<span class="text-gray-600">TVA livraison (20%)</span>
+								<span class="font-medium text-gray-800">1,05 €</span>
+							</div>
+						{% endif %}
+
+						<div class="flex justify-between py-2 border-t border-gray-300">
+							<span class="font-semibold text-gray-800">Total TTC</span>
+							<span class="font-bold text-xl text-gold" id="total">
+								{% if total >= 100 %}
+									{{ total|number_format(2, '.', ' ') }}
+								{% else %}
+									{{ (total + 5.25)|number_format(2, '.', ' ') }}
+								{% endif %}
+								€
+							</span>
+						</div>
+
+						{% if app.user %}
+							<a href="{{ path('create_order') }}" class="w-full bg-gold text-white py-3 rounded-full mt-6 hover:bg-yellow-600 transition flex items-center justify-center">
+								Procéder au paiement
+							</a>
+						{% else %}
+							<a href="{{ path('app_connexion') }}" class="w-full bg-gold text-white py-3 rounded-full mt-6 hover:bg-yellow-600 transition flex items-center justify-center">
+								Se connecter pour commander
+							</a>
+						{% endif %}
+
+						<div class="flex justify-between mt-8">
+							<a href="{{ path('app_catalogue') }}" class="text-gold hover:underline flex items-center">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+								</svg>
+								Continuer mes achats
+							</a>
+
+							{% if items|length > 0 %}
+								<a href="javascript:void(0)" onclick="openClearCartModal()" class="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+									</svg>
+									Vider le panier
 								</a>
 							{% endif %}
-
-							<div class="flex justify-between mt-8">
-								<a href="{{ path('app_catalogue') }}" class="text-gold hover:underline flex items-center">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-									</svg>
-									Continuer mes achats
-								</a>
-
-								{% if items|length > 0 %}
-									<a href="javascript:void(0)" onclick="openClearCartModal()" class="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-										</svg>
-										Vider le panier
-									</a>
-								{% endif %}
-							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		{% endif %}
-	</div>
+		</div>
+	{% endif %}
+</div>
 
-	<!-- Modale de confirmation pour vider le panier -->
-	<div id="clearCartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
-		<div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-			<div class="text-center mb-6">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-red-500 mb-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-				</svg>
-				<h3 class="text-xl font-semibold text-gray-800">Vider votre panier</h3>
-				<p class="text-gray-600 mt-2">Êtes-vous sûr de vouloir vider votre panier ? Cette action est irréversible.</p>
-			</div>
-			<div class="flex justify-center space-x-4">
-				<button onclick="closeClearCartModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition">
-					Annuler
-				</button>
-				<a href="{{ path('cart_clear') }}" class="px-4 py-2 bg-red-500 rounded-md text-white hover:bg-red-600 transition">
-					Vider le panier
-				</a>
-			</div>
+<!-- Modale de confirmation pour vider le panier -->
+<div id="clearCartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+	<div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+		<div class="text-center mb-6">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-red-500 mb-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+			</svg>
+			<h3 class="text-xl font-semibold text-gray-800">Vider votre panier</h3>
+			<p class="text-gray-600 mt-2">Êtes-vous sûr de vouloir vider votre panier ? Cette action est irréversible.</p>
+		</div>
+		<div class="flex justify-center space-x-4">
+			<button onclick="closeClearCartModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition">
+				Annuler
+			</button>
+			<a href="{{ path('cart_clear') }}" class="px-4 py-2 bg-red-500 rounded-md text-white hover:bg-red-600 transition">
+				Vider le panier
+			</a>
 		</div>
 	</div>
-
-{% endblock %}
-
-{% block javascripts %}
-	{{ parent() }}
-	<script>
-		function decreaseQuantity(button) {
+</div>{% endblock %}{% block javascripts %}
+{{ parent() }}
+<script>
+	function decreaseQuantity(button) {
 const input = button.nextElementSibling;
 if (input.value > 1) {
 input.value = parseInt(input.value) - 1;
@@ -263,5 +272,4 @@ if (event.key === 'Escape' && !document.getElementById('clearCartModal').classLi
 closeClearCartModal();
 }
 });
-	</script>
-{% endblock %}
+</script>{% endblock %}
