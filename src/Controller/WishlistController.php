@@ -7,6 +7,7 @@ use App\Entity\Wishlist;
 use App\Repository\WishlistRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -41,11 +42,24 @@ class WishlistController extends AbstractController
             $entityManager->persist($wishlistItem);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Produit ajouté à votre liste de favoris');
+            $message = 'Produit ajouté à votre liste de favoris';
+            $success = true;
         } else {
-            $this->addFlash('info', 'Ce produit est déjà dans votre liste de favoris');
+            $message = 'Ce produit est déjà dans votre liste de favoris';
+            $success = false;
         }
 
+        // Si c'est une requête AJAX, retourner une réponse JSON
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'success' => $success,
+                'message' => $message
+            ]);
+        }
+
+        // Sinon, ajouter un message flash et rediriger
+        $this->addFlash($success ? 'success' : 'info', $message);
+        
         // Rediriger vers la page précédente
         $referer = $request->headers->get('referer');
         return $this->redirect($referer ?: $this->generateUrl('app_catalogue'));
@@ -71,13 +85,27 @@ class WishlistController extends AbstractController
         if ($wishlistItem) {
             $entityManager->remove($wishlistItem);
             $entityManager->flush();
-
-            $this->addFlash('success', 'Produit retiré de votre liste de favoris');
+            $message = 'Produit retiré de votre liste de favoris';
+            $success = true;
+        } else {
+            $message = 'Ce produit n\'est pas dans votre liste de favoris';
+            $success = false;
         }
 
+        // Si c'est une requête AJAX, retourner une réponse JSON
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'success' => $success,
+                'message' => $message
+            ]);
+        }
+
+        // Sinon, ajouter un message flash et rediriger
+        $this->addFlash($success ? 'success' : 'info', $message);
+        
         // Rediriger vers la page précédente
         $referer = $request->headers->get('referer');
-        if (str_contains($referer, 'wishlist')) {
+        if (str_contains($referer ?: '', 'wishlist')) {
             return $this->redirectToRoute('app_account');
         }
         return $this->redirect($referer ?: $this->generateUrl('app_account'));

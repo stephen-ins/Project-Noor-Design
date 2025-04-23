@@ -89,14 +89,29 @@
 						</div>
 
 						<div class="p-6 pt-4 mt-auto border-t border-gray-100">
-							<div class="flex items-center">
-								{% if productDetail.stock > 0 %}
-									<span class="text-green-600 font-medium">En stock</span>
-									<span class="text-gray-500 text-sm ml-2">{{ productDetail.stock }}
-										articles restants</span>
-								{% else %}
-									<span class="text-red-600 font-medium">Rupture de stock</span>
-								{% endif %}
+							<div class="flex justify-between items-center">
+								<div>
+									{% if productDetail.stock > 0 %}
+										<span class="text-green-600 font-medium">En stock</span>
+										<span class="text-gray-500 text-sm ml-2">{{ productDetail.stock }}
+											articles restants</span>
+									{% else %}
+										<span class="text-red-600 font-medium">Rupture de stock</span>
+									{% endif %}
+								</div>
+								<div>
+									{% if app.user %}
+										{% if productsInWishlist[productDetail.id] is defined %}
+											<a href="{{ path('wishlist_remove', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Retirer de ma liste de souhaits">
+												<i class="fa-solid fa-heart text-red-600 text-xl hover:text-red-700 transition"></i>
+											</a>
+										{% else %}
+											<a href="{{ path('wishlist_add', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Ajouter à ma liste de souhaits">
+												<i class="fa-regular fa-heart text-gray-500 text-xl hover:text-red-600 transition"></i>
+											</a>
+										{% endif %}
+									{% endif %}
+								</div>
 							</div>
 						</div>
 

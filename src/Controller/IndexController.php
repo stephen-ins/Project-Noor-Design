@@ -32,14 +32,29 @@ final class IndexController extends AbstractController
 
     // route pour la page catalogue
     #[Route('/catalogue', name: 'app_catalogue')]
-    public function catalogue(ProductsRepository $repoAllProducts): Response
+    public function catalogue(ProductsRepository $repoAllProducts, WishlistRepository $wishlistRepository): Response
     {
         // Récupérer tous les produits de la base de données
         $allProducts = $repoAllProducts->findAll();
+        
+        // Créer un tableau pour stocker les infos de wishlist
+        $productsInWishlist = [];
+        
+        // Vérifier si l'utilisateur est connecté
+        if ($this->getUser()) {
+            // Récupérer tous les produits dans la wishlist de l'utilisateur
+            $wishlistItems = $wishlistRepository->findBy(['user' => $this->getUser()]);
+            
+            // Créer un tableau associatif avec les IDs des produits dans la wishlist
+            foreach ($wishlistItems as $item) {
+                $productsInWishlist[$item->getProduct()->getId()] = true;
+            }
+        }
 
         return $this->render('app/catalogue.html.twig', [
             'controller_name' => 'Catalogue',
             'allProducts' => $allProducts,
+            'productsInWishlist' => $productsInWishlist,
         ]);
     }
 
