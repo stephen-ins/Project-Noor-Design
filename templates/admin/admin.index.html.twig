@@ -17,18 +17,29 @@
 		</div>
 
 		<!-- Statistiques cards -->
-		<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-			<div class="bg-blue-600 text-white rounded-lg shadow">
-				<div class="p-4">
+		<!-- Carte des ventes (pleine largeur) -->
+		<div class="mb-6">
+			<div class="bg-blue-600 text-white rounded-lg shadow flex flex-col h-full">
+				<div class="p-4 flex-1 flex flex-col">
 					<div class="flex justify-between items-center">
-						<div>
+						<div class="w-full">
 							<h6 class="text-sm font-medium">Ventes</h6>
-							<h3 class="text-2xl font-bold">{{ totalSales|number_format(2, ',', ' ') }}
+							<h3 class="text-2xl font-bold text-center">{{ totalSales|number_format(2, ',', ' ') }}
 								€</h3>
+							<div class="text-xs mt-1">
+								<span class="font-medium">TVA (20%):</span>
+								{{ (totalSales * 0.2)|number_format(2, ',', ' ') }}
+								€
+							</div>
+							<div class="text-xs">
+								<span class="font-medium">HT:</span>
+								{{ (totalSales * 0.8)|number_format(2, ',', ' ') }}
+								€
+							</div>
 						</div>
 						<i class="bi bi-currency-euro text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">
+					<p class="text-xs mt-auto text-center pt-2">
 						{% if salesVariation > 0 %}
 							+{{ salesVariation }}% ce mois
 						{% elseif salesVariation < 0 %}
@@ -39,42 +50,46 @@
 					</p>
 				</div>
 			</div>
-			<div class="bg-green-600 text-white rounded-lg shadow">
-				<div class="p-4">
+		</div>
+
+		<!-- Cartes commandes, clients, produits (sur une ligne) -->
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+			<div class="bg-green-600 text-white rounded-lg shadow flex flex-col h-full">
+				<div class="p-4 flex-1 flex flex-col">
 					<div class="flex justify-between items-center">
-						<div>
+						<div class="w-full">
 							<h6 class="text-sm font-medium">Commandes</h6>
-							<h3 class="text-2xl font-bold">{{ totalOrders }}</h3>
+							<h3 class="text-2xl font-bold text-center">{{ totalOrders }}</h3>
 						</div>
 						<i class="bi bi-bag-check text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">{{ pendingOrders }}
+					<p class="text-xs mt-auto pt-2">{{ pendingOrders }}
 						en attente</p>
 				</div>
 			</div>
-			<div class="bg-cyan-600 text-white rounded-lg shadow">
-				<div class="p-4">
+			<div class="bg-cyan-600 text-white rounded-lg shadow flex flex-col h-full">
+				<div class="p-4 flex-1 flex flex-col">
 					<div class="flex justify-between items-center">
-						<div>
+						<div class="w-full">
 							<h6 class="text-sm font-medium">Clients</h6>
-							<h3 class="text-2xl font-bold">{{ totalCustomers }}</h3>
+							<h3 class="text-2xl font-bold text-center">{{ totalCustomers }}</h3>
 						</div>
 						<i class="bi bi-people text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">+{{ newCustomers }}
+					<p class="text-xs mt-auto pt-2">+{{ newCustomers }}
 						nouveaux ce mois-ci</p>
 				</div>
 			</div>
-			<div class="bg-yellow-500 text-white rounded-lg shadow">
-				<div class="p-4">
+			<div class="bg-yellow-500 text-white rounded-lg shadow flex flex-col h-full">
+				<div class="p-4 flex-1 flex flex-col">
 					<div class="flex justify-between items-center">
-						<div>
+						<div class="w-full">
 							<h6 class="text-sm font-medium">Produits</h6>
-							<h3 class="text-2xl font-bold">{{ totalProducts }}</h3>
+							<h3 class="text-2xl font-bold text-center">{{ totalProducts }}</h3>
 						</div>
 						<i class="bi bi-gem text-4xl"></i>
 					</div>
-					<p class="text-xs mt-2">{{ outOfStockProducts }}
+					<p class="text-xs mt-auto pt-2">{{ outOfStockProducts }}
 						en rupture</p>
 				</div>
 			</div>

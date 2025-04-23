@@ -45,30 +45,65 @@
 					<span class="font-medium">{{ order.status.value }}</span>
 				</div>
 
-				{# Afficher le sous-total (sans frais de port) #}
+				{# Calcul du sous-total HT et des frais de livraison #}
 				{% set subtotal = order.total %}
+				{% set shippingTTC = 5.25 %}
+				{% set shippingHT = shippingTTC * 0.8 %}
+				{% set shippingTVA = shippingTTC - shippingHT %}
+
 				{% if order.shippingFee is defined and order.shippingFee > 0 %}
 					{% set subtotal = order.total - order.shippingFee %}
 				{% endif %}
 
+				{# Calcul du montant HT et de la TVA des produits #}
+				{% set subtotalHT = subtotal * 0.8 %}
+				{% set subtotalTVA = subtotal - subtotalHT %}
+
 				<div class="flex justify-between mb-2">
-					<span class="text-gray-600">Sous-total :</span>
-					<span class="font-medium">{{ subtotal|number_format(2, '.', ' ') }}
+					<span class="text-gray-600">Sous-total HT :</span>
+					<span class="font-medium">{{ subtotalHT|number_format(2, '.', ' ') }}
 						€</span>
 				</div>
 
 				<div class="flex justify-between mb-2">
-					<span class="text-gray-600">Livraison :</span>
-					{% if order.shippingFee is defined and order.shippingFee > 0 %}
-						<span class="font-medium">{{ order.shippingFee|number_format(2, '.', ' ') }}
+					<span class="text-gray-600">TVA produits (20%) :</span>
+					<span class="font-medium">{{ subtotalTVA|number_format(2, '.', ' ') }}
+						€</span>
+				</div>
+
+				{% if order.shippingFee is defined and order.shippingFee > 0 %}
+					<div class="flex justify-between mb-2">
+						<span class="text-gray-600">Livraison HT :</span>
+						<span class="font-medium">{{ shippingHT|number_format(2, '.', ' ') }}
 							€</span>
-					{% else %}
+					</div>
+
+					<div class="flex justify-between mb-2">
+						<span class="text-gray-600">TVA livraison (20%) :</span>
+						<span class="font-medium">{{ shippingTVA|number_format(2, '.', ' ') }}
+							€</span>
+					</div>
+
+					<div class="flex justify-between mb-2">
+						<span class="text-gray-600">Livraison TTC :</span>
+						<span class="font-medium">{{ shippingTTC|number_format(2, '.', ' ') }}
+							€</span>
+					</div>
+				{% else %}
+					<div class="flex justify-between mb-2">
+						<span class="text-gray-600">Livraison :</span>
 						<span class="text-green-600 font-medium">Gratuite</span>
-					{% endif %}
+					</div>
+				{% endif %}
+
+				<div class="flex justify-between mb-2">
+					<span class="text-gray-600">Sous-total TTC :</span>
+					<span class="font-medium">{{ subtotal|number_format(2, '.', ' ') }}
+						€</span>
 				</div>
 
 				<div class="flex justify-between">
-					<span class="text-gray-600">Total :</span>
+					<span class="text-gray-600">Total TTC :</span>
 					<span class="font-medium text-gold">{{ order.total }}
 						€</span>
 				</div>
@@ -81,9 +116,9 @@
 					<thead>
 						<tr class="bg-gray-100 text-gray-600">
 							<th class="py-3 px-4 text-left">Produit</th>
-							<th class="py-3 px-4 text-center">Prix unitaire</th>
+							<th class="py-3 px-4 text-center">Prix unitaire TTC</th>
 							<th class="py-3 px-4 text-center">Quantité</th>
-							<th class="py-3 px-4 text-center">Total</th>
+							<th class="py-3 px-4 text-center">Total TTC</th>
 						</tr>
 					</thead>
 					<tbody>
