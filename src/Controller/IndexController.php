@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Products;
+use App\Repository\CategoriesRepository;
 use App\Repository\ProductsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\WishlistRepository;
@@ -32,29 +34,99 @@ final class IndexController extends AbstractController
 
     // route pour la page catalogue
     #[Route('/catalogue', name: 'app_catalogue')]
-    public function catalogue(ProductsRepository $repoAllProducts, WishlistRepository $wishlistRepository): Response
+    public function catalogue(ProductsRepository $repoAllProducts, CategoriesRepository $categoriesRepository, WishlistRepository $wishlistRepository, Request $request): Response
     {
-        // Récupérer tous les produits de la base de données
-        $allProducts = $repoAllProducts->findAll();
-        
+        // Récupérer les paramètres de filtrage
+        $categoryId = $request->query->get('category');
+        $priceRange = $request->query->get('price_range');
+        $sort = $request->query->get('sort', 'nouveautes'); // Valeur par défaut: nouveautés
+        $wishlistOnly = $request->query->get('wishlist_only') === '1';
+
+        // Construire les critères de recherche
+        $criteria = [];
+        if ($categoryId) {
+            $criteria['categorie'] = $categoryId;
+        }
+
+        // Appliquer les filtres de prix
+        $qb = $repoAllProducts->createQueryBuilder('p');
+
+        if (!empty($criteria)) {
+            foreach ($criteria as $field => $value) {
+                $qb->andWhere("p.{$field} = :{$field}")
+                    ->setParameter($field, $value);
+            }
+        }
+
+        // Filtre de prix
+        if ($priceRange) {
+            switch ($priceRange) {
+                case '0-50':
+                    $qb->andWhere('p.prix < 50');
+                    break;
+                case '50-100':
+                    $qb->andWhere('p.prix >= 50 AND p.prix <= 100');
+                    break;
+                case '100-200':
+                    $qb->andWhere('p.prix > 100 AND p.prix <= 200');
+                    break;
+                case '200+':
+                    $qb->andWhere('p.prix > 200');
+                    break;
+            }
+        }
+
+        // Tri
+        switch ($sort) {
+            case 'prix-asc':
+                $qb->orderBy('p.prix', 'ASC');
+                break;
+            case 'prix-desc':
+                $qb->orderBy('p.prix', 'DESC');
+                break;
+            case 'nouveautes':
+            default:
+                $qb->orderBy('p.id', 'DESC'); // Supposons que les ID plus élevés sont les plus récents
+                break;
+        }
+
+        // Exécuter la requête
+        $allProducts = $qb->getQuery()->getResult();
+
+        // Récupérer toutes les catégories
+        $categories = $categoriesRepository->findAll();
+
         // Créer un tableau pour stocker les infos de wishlist
         $productsInWishlist = [];
-        
+
         // Vérifier si l'utilisateur est connecté
         if ($this->getUser()) {
             // Récupérer tous les produits dans la wishlist de l'utilisateur
             $wishlistItems = $wishlistRepository->findBy(['user' => $this->getUser()]);
-            
+
             // Créer un tableau associatif avec les IDs des produits dans la wishlist
             foreach ($wishlistItems as $item) {
                 $productsInWishlist[$item->getProduct()->getId()] = true;
             }
+            
+            // Filtrer les produits pour n'afficher que ceux dans la wishlist si demandé
+            if ($wishlistOnly) {
+                $allProducts = array_filter($allProducts, function($product) use ($productsInWishlist) {
+                    return isset($productsInWishlist[$product->getId()]);
+                });
+            }
+        } elseif ($wishlistOnly) {
+            // Si l'utilisateur n'est pas connecté mais a demandé les favoris,
+            // renvoyer une liste vide
+            $allProducts = [];
         }
 
         return $this->render('app/catalogue.html.twig', [
             'controller_name' => 'Catalogue',
             'allProducts' => $allProducts,
             'productsInWishlist' => $productsInWishlist,
+            'categories' => $categories,
+            'wishlistOnly' => $wishlistOnly,
         ]);
     }
 

@@ -27,19 +27,19 @@
 							<h3 class="text-2xl font-bold text-center">{{ totalSales|number_format(2, ',', ' ') }}
 								€</h3>
 							<div class="text-xs mt-1">
-								<span class="font-medium">TVA (20%):</span>
-								{{ (totalSales * 0.2)|number_format(2, ',', ' ') }}
-								€
+								<span class="font-bold">TVA (20%):</span>
+								<span class="font-bold">{{ (totalSales * 0.2)|number_format(2, ',', ' ') }}
+									€</span>
 							</div>
 							<div class="text-xs">
-								<span class="font-medium">HT:</span>
-								{{ (totalSales * 0.8)|number_format(2, ',', ' ') }}
-								€
+								<span class="font-bold">HT:</span>
+								<span class="font-bold">{{ (totalSales * 0.8)|number_format(2, ',', ' ') }}
+									€</span>
 							</div>
 						</div>
 						<i class="bi bi-currency-euro text-4xl"></i>
 					</div>
-					<p class="text-xs mt-auto text-center pt-2">
+					<p class="text-xs mt-auto font-bold text-center pt-2">
 						{% if salesVariation > 0 %}
 							+{{ salesVariation }}% ce mois
 						{% elseif salesVariation < 0 %}
@@ -63,7 +63,7 @@
 						</div>
 						<i class="bi bi-bag-check text-4xl"></i>
 					</div>
-					<p class="text-xs mt-auto pt-2">{{ pendingOrders }}
+					<p class="font-bold text-xs mt-auto pt-2">{{ pendingOrders }}
 						en attente</p>
 				</div>
 			</div>
@@ -76,7 +76,7 @@
 						</div>
 						<i class="bi bi-people text-4xl"></i>
 					</div>
-					<p class="text-xs mt-auto pt-2">+{{ newCustomers }}
+					<p class="font-bold text-xs mt-auto pt-2">+{{ newCustomers }}
 						nouveaux ce mois-ci</p>
 				</div>
 			</div>
@@ -85,12 +85,50 @@
 					<div class="flex justify-between items-center">
 						<div class="w-full">
 							<h6 class="text-sm font-medium">Produits</h6>
-							<h3 class="text-2xl font-bold text-center">{{ totalProducts }}</h3>
+							<h3 class="font-bold text-2xl font-bold text-center">{{ totalProducts }}</h3>
 						</div>
 						<i class="bi bi-gem text-4xl"></i>
 					</div>
-					<p class="text-xs mt-auto pt-2">{{ outOfStockProducts }}
+					<p class="font-bold text-xs mt-auto pt-2">{{ countOutOfStockProducts }}
 						en rupture</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Graphique des ventes | dernières activités -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mb-6">
+			<div class="bg-white rounded-lg shadow">
+				<div class="px-6 py-4 border-b">
+					<h5 class="font-semibold">Évolution des ventes</h5>
+				</div>
+				<div class="p-6">
+					<canvas id="salesChart" height="200"></canvas>
+				</div>
+			</div>
+			<div class="bg-white rounded-lg shadow">
+				<div class="px-6 py-4 border-b">
+					<h5 class="font-semibold">Activités récentes</h5>
+				</div>
+				<div class="p-6">
+					<div class="space-y-4">
+						{% if recentActivities|length > 0 %}
+							{% for activity in recentActivities %}
+								<div class="flex">
+									<div class="flex-shrink-0 mr-3">
+										<div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+											<i class="bi {{ activity.icon }} text-blue-600"></i>
+										</div>
+									</div>
+									<div>
+										<p class="text-sm font-medium">{{ activity.description }}</p>
+										<p class="text-xs text-gray-500">{{ activity.date|date('d/m/Y H:i') }}</p>
+									</div>
+								</div>
+							{% endfor %}
+						{% else %}
+							<p class="text-gray-500 text-center">Aucune activité récente</p>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -170,7 +208,7 @@
 			</div>
 		</div>
 
-		<!-- Produits les plus vendus | stock réel -->
+		<!-- Produits les plus vendus | stock faible | stock épuisé -->
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			<div class="bg-white rounded-lg shadow">
 				<div class="px-6 py-4 border-b">
@@ -209,7 +247,7 @@
 										<span class="mr-2 {% if product.stock <= 5 %}text-red-600 font-bold{% else %}text-yellow-600{% endif %}">{{ product.stock }}
 											unités</span>
 										<div class="w-24 bg-gray-200 rounded-full h-2.5">
-											<div class="bg-red-600 h-2.5 rounded-full" style="width: {{ (product.stock / 20) * 100 }}%"></div>
+											<div class="bg-red-600 h-2.5 rounded-full" style="width: {{ (product.stock / 5) * 100 }}%"></div>
 										</div>
 									</div>
 								</div>
@@ -219,46 +257,36 @@
 						{% endif %}
 					</div>
 				</div>
-			</div>
-		</div>
-
-		<!-- Graphique des ventes | dernières activités -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-			<div class="bg-white rounded-lg shadow">
 				<div class="px-6 py-4 border-b">
-					<h5 class="font-semibold">Évolution des ventes</h5>
-				</div>
-				<div class="p-6">
-					<canvas id="salesChart" height="200"></canvas>
-				</div>
-			</div>
-			<div class="bg-white rounded-lg shadow">
-				<div class="px-6 py-4 border-b">
-					<h5 class="font-semibold">Activités récentes</h5>
+					<h5 class="font-semibold">Stocks épuisé</h5>
 				</div>
 				<div class="p-6">
 					<div class="space-y-4">
-						{% if recentActivities|length > 0 %}
-							{% for activity in recentActivities %}
-								<div class="flex">
-									<div class="flex-shrink-0 mr-3">
-										<div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-											<i class="bi {{ activity.icon }} text-blue-600"></i>
+						{% if outOfStockProducts|length > 0 %}
+							{% for product in outOfStockProducts %}
+								<div class="flex justify-between items-center">
+									<span>{{ product.nom }}</span>
+									<div class="flex items-center">
+										<span class="mr-2 text-red-600 font-bold">0 unité</span>
+										<div class="w-24 bg-gray-200 rounded-full h-2.5">
+											<div class="bg-red-600 h-2.5 rounded-full" style="width: 0%"></div>
 										</div>
-									</div>
-									<div>
-										<p class="text-sm font-medium">{{ activity.description }}</p>
-										<p class="text-xs text-gray-500">{{ activity.date|date('d/m/Y H:i') }}</p>
+										<a href="{{ path('app_admin_products_edit', {'id': product.id}) }}" class="ml-3 flex items-center justify-center bg-amber-50 text-amber-600 border border-amber-300 rounded px-2 py-1 hover:bg-amber-100 transition-colors">
+											<i class="bi bi-pencil-square mr-1" title="Modifier le stock"></i>
+											<span class="text-xs font-medium">Mettre à jour</span>
+										</a>
 									</div>
 								</div>
 							{% endfor %}
 						{% else %}
-							<p class="text-gray-500 text-center">Aucune activité récente</p>
+							<p class="text-gray-500 text-center">Aucun produit en rupture de stock</p>
 						{% endif %}
 					</div>
 				</div>
 			</div>
 		</div>
+
+
 	</main>
 
 	{% block javascripts %}

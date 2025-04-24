@@ -39,6 +39,7 @@
 					<tr>
 						<th class="px-6 py-3">Nom</th>
 						<th class="px-6 py-3">Description</th>
+						<th class="px-6 py-3">Produits</th>
 						<th class="px-6 py-3">Date d'enregistrement</th>
 						<th class="px-6 py-3">Actions</th>
 					</tr>
@@ -54,6 +55,19 @@
 									<span class="text-gray-400">Aucune description</span>
 								{% endif %}
 							</td>
+
+							<td class="px-6 py-4">
+								{% if category.products is not null and category.products|length > 0 %}
+									<div class="inline-flex items-center justify-center bg-amber-600 text-white rounded-full h-8 w-8 shadow-sm">
+										<span class="font-medium">{{ category.products|length }}</span>
+									</div>
+								{% else %}
+									<div class="inline-flex items-center justify-center bg-gray-200 text-amber rounded-full h-8 w-8 shadow-sm">
+										<span class="font-medium">0</span>
+									</div>
+								{% endif %}
+							</td>
+
 							<td class="px-6 py-4">
 								{% if category.dateCreation is not null %}
 									{{ category.dateCreation|date('d/m/Y') }}

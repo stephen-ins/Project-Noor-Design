@@ -90,8 +90,11 @@ final class AdminController extends AbstractController
         // Nombre total de produits
         $totalProducts = $productsRepository->count([]);
 
-        // Produits en rupture de stock
-        $outOfStockProducts = $productsRepository->count(['stock' => 0]);
+        // Nombre de produits en rupture de stock
+        $countOutOfStockProducts = $productsRepository->count(['stock' => 0]);
+        
+        // Liste des produits en rupture de stock (stock = 0)
+        $outOfStockProducts = $productsRepository->findBy(['stock' => 0], ['nom' => 'ASC'], 10);
 
         // Récupérer les commandes récentes
         $recentOrders = $ordersRepository->findBy([], ['date_commande' => 'DESC'], 5);
@@ -195,6 +198,7 @@ final class AdminController extends AbstractController
             'totalCustomers' => $totalCustomers,
             'newCustomers' => $newCustomers,
             'totalProducts' => $totalProducts,
+            'countOutOfStockProducts' => $countOutOfStockProducts,
             'outOfStockProducts' => $outOfStockProducts,
             'recentOrders' => $recentOrders,
             'popularProducts' => $popularProducts,
@@ -478,9 +482,31 @@ final class AdminController extends AbstractController
 
     // route pour la gestion des commandes
     #[Route('/orders', name: 'app_admin_orders')]
-    public function orders(EntityManagerInterface $entityManager): Response
+    #[Route('/orders/user/{userId}', name: 'app_admin_user_orders')]
+    public function orders(EntityManagerInterface $entityManager, Request $request): Response
     {
-        $orders = $entityManager->getRepository(Orders::class)->findBy([], ['date_commande' => 'DESC']);
+        $userId = $request->attributes->get('userId');
+        $orderRepository = $entityManager->getRepository(Orders::class);
+        
+        if ($userId) {
+            // Si un ID d'utilisateur est fourni, filtrer pour ce client spécifique
+            $user = $entityManager->getRepository(Users::class)->find($userId);
+            
+            if (!$user) {
+                $this->addFlash('error', 'Le client demandé n\'existe pas.');
+                return $this->redirectToRoute('app_admin_users');
+            }
+            
+            $orders = $orderRepository->findBy(['user' => $user], ['date_commande' => 'DESC']);
+            
+            return $this->render('admin/admin.user.orders.html.twig', [
+                'orders' => $orders,
+                'user' => $user
+            ]);
+        }
+        
+        // Si aucun ID d'utilisateur n'est fourni, afficher toutes les commandes
+        $orders = $orderRepository->findBy([], ['date_commande' => 'DESC']);
 
         return $this->render('admin/admin.orders.html.twig', [
             'controller_name' => 'AdminController',
