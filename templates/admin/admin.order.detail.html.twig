@@ -132,11 +132,17 @@
 					</button>
 				</form>
 
-				<div class="mt-6">
-					<a href="mailto:{{ order.user.email }}" class="flex items-center justify-center text-amber-600 hover:text-amber-900 mb-2">
+				<div class="mt-6 flex justify-center space-x-8">
+					<a href="mailto:{{ order.user.email }}" class="flex items-center text-amber-600 hover:text-amber-900">
 						<i class="bi bi-envelope mr-2"></i>
 						Contacter le client
 					</a>
+					{% if order.user.phone %}
+						<a href="sms:{{ order.user.phone }}" class="flex items-center text-amber-600 hover:text-amber-900">
+							<i class="bi bi-chat-text mr-2"></i>
+							Envoyer un SMS
+						</a>
+					{% endif %}
 				</div>
 			</div>
 		</div>

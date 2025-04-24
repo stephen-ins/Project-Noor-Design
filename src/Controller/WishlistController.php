@@ -105,9 +105,13 @@ class WishlistController extends AbstractController
         
         // Rediriger vers la page précédente
         $referer = $request->headers->get('referer');
-        if (str_contains($referer ?: '', 'wishlist')) {
-            return $this->redirectToRoute('app_account');
+        
+        // Vérifier si l'URL précédente contient le paramètre wishlist_only=1
+        if (str_contains($referer ?: '', 'wishlist_only=1')) {
+            return $this->redirectToRoute('app_catalogue', ['wishlist_only' => '1']);
         }
-        return $this->redirect($referer ?: $this->generateUrl('app_account'));
+        
+        // Sinon, rediriger vers la page précédente ou le catalogue
+        return $this->redirect($referer ?: $this->generateUrl('app_catalogue'));
     }
 }

@@ -19,122 +19,136 @@
 
 	<!-- Catalogue Section -->
 	<div class="container mx-auto px-6 py-12">
-		<div
-			class="flex flex-col md:flex-row justify-between mb-10">
-			<!-- Filtre -->
-			<div class="flex flex-wrap items-center gap-4 mb-6 md:mb-0">
-				<span class="text-gray-700 font-medium">Filtrer par :</span>
-				<div class="relative">
-					<select class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm">
-						<option value="">Catégorie</option>
-						<option value="colliers">Colliers</option>
-						<option value="bracelets">Bracelets</option>
-						<option value="boucles-oreilles">Boucles d'oreilles</option>
-						<option value="bagues">Bagues</option>
-						<option value="Grigris">Grigris</option>
-					</select>
-				</div>
-				<div class="relative">
-					<select class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm">
-						<option value="">Prix</option>
-						<option value="0-50">Moins de 50€</option>
-						<option value="50-100">50€ - 100€</option>
-						<option value="100-200">100€ - 200€</option>
-						<option value="200+">Plus de 200€</option>
-					</select>
-				</div>
-				<div class="relative">
-					<select class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm">
-						<option value="">Matériaux</option>
-						<option value="or">Or</option>
-						<option value="argent">Argent</option>
-						<option value="pierres">Pierres précieuses</option>
-						<option value="perles">Perles</option>
-					</select>
-				</div>
-			</div>
-			<!-- Tri D ou C ou popularite -->
-			<div class="flex items-center">
-				<span class="text-gray-700 font-medium mr-3">Trier par :</span>
-				<select class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm">
-					<option value="nouveautes">Nouveautés</option>
-					<option value="prix-asc">Prix croissant</option>
-					<option value="prix-desc">Prix décroissant</option>
-					<option value="populaires">Popularité</option>
-				</select>
-			</div>
-		</div>
-
-		<!-- Tableau des produits -->
-		<div
-			class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-
-			<!-- Affichage des produits de la BDD par tour de boucle -->
-			{% for productDetail in allProducts %}
-				<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
+		<form action="{{ path('app_catalogue') }}" method="GET" class="mb-10">
+			<div
+				class="flex flex-wrap items-center justify-between gap-4 mb-4">
+				<!-- Filtres et tri sur une seule ligne -->
+				<div class="flex flex-wrap items-center gap-4">
+					<span class="text-gray-700 font-medium">Filtrer par :</span>
 					<div
-						class="overflow-hidden">
-						{# Voir avec la cliente si object-cover conviendrait pour l affichage des photos #}
-						<img src="{{ asset('uploads/products/' ~ productDetail.image) }}" alt="{{ productDetail.nom }}" class="w-full h-80 object-contain"/>
+						class="relative">
+						{# filtre avec les donnee categories #}
+						<select name="category" class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm">
+							<option value="">Catégorie</option>
+							{% for category in categories %}
+								<option value="{{ category.id }}" {% if app.request.query.get('category') == category.id ~ '' %} selected {% endif %}>{{ category.nom }}</option>
+							{% endfor %}
+						</select>
 					</div>
 
-					<div class="product-content flex flex-col flex-grow">
-						<div class="p-6 pb-2">
-							<h3 class="text-xl font-semibold text-gray-800">
-								{{ productDetail.nom }}
-							</h3>
-							<p class="text-gray-600 mt-2 text-sm">
-								{{ productDetail.description }}
-							</p>
+					<div class="relative">
+						<select name="price_range" class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm">
+							<option value="">Prix</option>
+							<option value="0-50" {% if app.request.query.get('price_range') == '0-50' %} selected {% endif %}>Moins de 50€</option>
+							<option value="50-100" {% if app.request.query.get('price_range') == '50-100' %} selected {% endif %}>50€ - 100€</option>
+							<option value="100-200" {% if app.request.query.get('price_range') == '100-200' %} selected {% endif %}>100€ - 200€</option>
+							<option value="200+" {% if app.request.query.get('price_range') == '200+' %} selected {% endif %}>Plus de 200€</option>
+						</select>
+					</div>
+
+					<span class="text-gray-700 font-medium ml-2">Trier par :</span>
+					<div class="relative">
+						<select name="sort" class="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold text-sm">
+							<option value="nouveautes" {% if app.request.query.get('sort') == 'nouveautes' %} selected {% endif %}>Nouveautés</option>
+							<option value="prix-asc" {% if app.request.query.get('sort') == 'prix-asc' %} selected {% endif %}>Prix croissant</option>
+							<option value="prix-desc" {% if app.request.query.get('sort') == 'prix-desc' %} selected {% endif %}>Prix décroissant</option>
+						</select>
+					</div>
+				</div>
+
+
+				<div class="flex items-center gap-8">
+					{% if app.user %}
+						{% if wishlistOnly %}
+							<a href="{{ path('app_catalogue') }}" class="text-gray-700 hover:text-gold transition" title="Afficher tous les produits">
+								<i class="fa-solid fa-heart text-red-600 text-xl"></i>
+							</a>
+						{% else %}
+							<a href="{{ path('app_catalogue', {'wishlist_only': '1'}) }}" class="text-gray-700 hover:text-gold transition" title="Afficher uniquement mes favoris">
+								<i class="fa-solid fa-heart text-xl"></i>
+							</a>
+						{% endif %}
+					{% endif %}
+					<button type="submit" title="Appliquer le filtre" class="bg-gold text-white py-2 px-4 rounded-md hover:bg-amber-600 transition">
+						Appliquer
+					</button>
+					<a href="{{ path('app_catalogue') }}" title="Réinitialiser le filtre" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition">
+						Réinitialiser
+					</a>
+
+				</div>
+			</form>
+
+			<!-- Tableau des produits -->
+			<div
+				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+				<!-- Affichage des produits de la BDD par tour de boucle -->
+				{% for productDetail in allProducts %}
+					<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
+						<div
+							class="overflow-hidden">
+							{# Voir avec la cliente si object-cover conviendrait pour l affichage des photos #}
+							<img src="{{ asset('uploads/products/' ~ productDetail.image) }}" alt="{{ productDetail.nom }}" class="w-full h-80 object-contain"/>
 						</div>
 
-						<div class="p-6 pt-4 mt-auto border-t border-gray-100">
-							<div class="flex justify-between items-center">
-								<div>
-									{% if productDetail.stock > 0 %}
-										<span class="text-green-600 font-medium">En stock</span>
-										<span class="text-gray-500 text-sm ml-2">{{ productDetail.stock }}
-											articles restants</span>
-									{% else %}
-										<span class="text-red-600 font-medium">Rupture de stock</span>
-									{% endif %}
-								</div>
-								<div>
-									{% if app.user %}
-										{% if productsInWishlist[productDetail.id] is defined %}
-											<a href="{{ path('wishlist_remove', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Retirer de ma liste de souhaits">
-												<i class="fa-solid fa-heart text-red-600 text-xl hover:text-red-700 transition"></i>
-											</a>
+						<div class="product-content flex flex-col flex-grow">
+							<div class="p-6 pb-2">
+								<h3 class="text-xl font-semibold text-gray-800">
+									{{ productDetail.nom }}
+								</h3>
+								<p class="text-gray-600 mt-2 text-sm">
+									{{ productDetail.description }}
+								</p>
+							</div>
+
+							<div class="p-6 pt-4 mt-auto border-t border-gray-100">
+								<div class="flex justify-between items-center">
+									<div>
+										{% if productDetail.stock > 0 %}
+											<span class="text-green-600 font-medium">En stock</span>
+											<span class="text-gray-500 text-sm ml-2">{{ productDetail.stock }}
+												articles restants</span>
 										{% else %}
-											<a href="{{ path('wishlist_add', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Ajouter à ma liste de souhaits">
-												<i class="fa-regular fa-heart text-gray-500 text-xl hover:text-red-600 transition"></i>
-											</a>
+											<span class="text-red-600 font-medium">Rupture de stock</span>
 										{% endif %}
-									{% endif %}
+									</div>
+									<div>
+										{% if app.user %}
+											{% if productsInWishlist[productDetail.id] is defined %}
+												<a href="{{ path('wishlist_remove', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Retirer de ma liste de souhaits">
+													<i class="fa-solid fa-heart text-red-600 text-xl hover:text-red-700 transition"></i>
+												</a>
+											{% else %}
+												<a href="{{ path('wishlist_add', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Ajouter à ma liste de souhaits">
+													<i class="fa-regular fa-heart text-gray-500 text-xl hover:text-red-600 transition"></i>
+												</a>
+											{% endif %}
+										{% endif %}
+									</div>
 								</div>
 							</div>
-						</div>
 
-						<div class="p-6 pt-2 mt-auto border-t border-gray-100 flex justify-between items-center">
-							<span class="text-gold font-bold">{{ productDetail.prix }}
-								€</span>
-							<a href="{{ path('app_produit', {'id': productDetail.id}) }}" class="text-gold hover:underline">Voir détails</a>
+							<div class="p-6 pt-2 mt-auto border-t border-gray-100 flex justify-between items-center">
+								<span class="text-gold font-bold">{{ productDetail.prix }}
+									€</span>
+								<a href="{{ path('app_produit', {'id': productDetail.id}) }}" class="text-gold hover:underline">Voir détails</a>
+							</div>
 						</div>
 					</div>
-				</div>
-			{% endfor %}
+				{% endfor %}
+			</div>
+
+			<!-- Pagination -->
+			<div class="flex justify-center mt-12">
+				<nav class="inline-flex rounded-md shadow">
+					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-l-md">Précédent</a>
+					<a href="#" class="py-2 px-4 bg-gold text-white border border-gold">1</a>
+					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">2</a>
+					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">3</a>
+					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-r-md">Suivant</a>
+				</nav>
+			</div>
 		</div>
 
-		<!-- Pagination -->
-		<div class="flex justify-center mt-12">
-			<nav class="inline-flex rounded-md shadow">
-				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-l-md">Précédent</a>
-				<a href="#" class="py-2 px-4 bg-gold text-white border border-gold">1</a>
-				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">2</a>
-				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">3</a>
-				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-r-md">Suivant</a>
-			</nav>
-		</div>
-	</div>
-
-{% endblock %}
+	{% endblock %}

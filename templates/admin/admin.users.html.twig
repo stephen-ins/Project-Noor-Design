@@ -46,7 +46,7 @@
 							<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adresse</th>
 							<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'inscription</th>
 							<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
-							<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+							<th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
 						</tr>
 					</thead>
 					<tbody class="bg-white divide-y divide-gray-200" id="user-table-body">
@@ -91,11 +91,18 @@
 											<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Client</span>
 										{% endif %}
 									</td>
-									<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-										<div class="flex justify-end">
-											<a href="#" class="text-blue-600 hover:text-blue-900 view-details" data-user-id="{{ user.id }}" data-user-nom="{{ user.nom }}" data-user-prenom="{{ user.prenom }}" data-user-email="{{ user.email }}" data-user-phone="{{ user.phone }}" data-user-birthday="{{ user.birthday ? user.birthday|date('d/m/Y') : 'Non renseignée' }}" data-user-adresse="{{ user.adresse }}, {{ user.zipcode }} {{ user.ville }}, {{ user.pays }}" title="Voir les détails">
-												<i class="bi bi-eye"></i>
+									<td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+										<div class="flex justify-center space-x-8">
+											<a href="#" class="text-blue-600 hover:text-blue-900 view-details" data-user-id="{{ user.id }}" data-user-nom="{{ user.nom }}" data-user-prenom="{{ user.prenom }}" data-user-email="{{ user.email }}" data-user-phone="{{ user.phone }}" data-user-birthday="{{ user.birthday ? user.birthday|date('d/m/Y') : 'Non renseignée' }}" data-user-adresse="{{ user.adresse }}, {{ user.zipcode }} {{ user.ville }}, {{ user.pays }}" title="Fiche contact">
+												<i class="bi bi-person-vcard"></i>
 											</a>
+
+
+											<a href="{{ path('app_admin_user_orders', {'userId': user.id}) }}" class="text-green-600 hover:text-green-900" title="Les commandes du client">
+												<i class="bi bi-person-lines-fill"></i>
+											</a>
+
+
 											{% if is_granted('ROLE_SUPER_ADMIN') %}
 												<div class="ml-2 text-gray-400 text-xs">
 													<span class="tooltip" data-tooltip="Pour des raisons légales, seul un super administrateur peut effectuer ces actions">
@@ -135,49 +142,6 @@
 			</div>
 		</div>
 
-		<!-- Données des commandes cachées -->
-		<div class="hidden">
-			{% for user in users %}
-				{% if userOrders[user.id] is defined %}
-					<div id="orders-list-{{ user.id }}" class="orders-data">
-						{% if userOrders[user.id] is not empty %}
-							<table class="min-w-full divide-y divide-gray-200 text-sm">
-								<thead class="bg-gray-50">
-									<tr>
-										<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">N° Commande</th>
-										<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-										<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-										<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-									</tr>
-								</thead>
-								<tbody class="bg-white divide-y divide-gray-200">
-									{% for order in userOrders[user.id] %}
-										<tr>
-											<td class="px-3 py-2 whitespace-nowrap">CMD-{{ order.id }}</td>
-											<td class="px-3 py-2 whitespace-nowrap">{{ order.dateCommande|date('d/m/Y') }}</td>
-											<td class="px-3 py-2 whitespace-nowrap">{{ order.total|number_format(2, ',', ' ') }}
-												€</td>
-											<td class="px-3 py-2 whitespace-nowrap">
-												<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-																																																							{% if order.status.value == 'EN_ATTENTE' %}bg-yellow-100 text-yellow-800
-																																																							{% elseif order.status.value == 'EXPEDIEE' %}bg-blue-100 text-blue-800
-																																																							{% elseif order.status.value == 'LIVREE' %}bg-green-100 text-green-800
-																																																							{% elseif order.status.value == 'ANNULEE' %}bg-red-100 text-red-800
-																																																							{% else %}bg-gray-100 text-gray-800{% endif %}">
-													{{ order.status.value }}
-												</span>
-											</td>
-										</tr>
-									{% endfor %}
-								</tbody>
-							</table>
-						{% else %}
-							<p class="text-gray-400 italic">Aucune commande</p>
-						{% endif %}
-					</div>
-				{% endif %}
-			{% endfor %}
-		</div>
 	</main>
 
 	<!-- Modal de détail utilisateur -->
@@ -215,10 +179,18 @@
 						<p class="text-sm font-medium text-gray-500">Adresse</p>
 						<p class="text-user-address"></p>
 					</div>
-					<div>
-						<p class="text-sm font-medium text-gray-500">Commandes</p>
-						<div class="text-user-orders"></div>
+
+					<div class="my-5 flex space-x-3">
+						<a href="#" id="contact-client-btn" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+							<i class="bi bi-envelope mr-2"></i>
+							Contacter par email
+						</a>
+						<a href="#" id="sms-client-btn" class="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+							<i class="bi bi-chat-dots mr-2"></i>
+							Contacter par SMS
+						</a>
 					</div>
+
 				</div>
 			</div>
 			<div class="bg-gray-50 px-6 py-3 flex justify-end rounded-b-lg">
@@ -304,18 +276,16 @@ document.querySelector('.text-user-phone').textContent = this.dataset.userPhone;
 document.querySelector('.text-user-birthday').textContent = this.dataset.userBirthday;
 document.querySelector('.text-user-address').textContent = this.dataset.userAdresse;
 
-// Afficher les commandes du client
-const ordersContainer = document.querySelector('.text-user-orders');
-const ordersList = document.getElementById (`orders-list-${userId}`);
+// Configurer le bouton mailto
+const contactButton = document.getElementById('contact-client-btn');
+contactButton.href = `mailto:${
+this.dataset.userEmail
+}`;
 
-if (ordersList) {
-ordersContainer.innerHTML = '';
-const ordersContent = ordersList.cloneNode(true);
-ordersContent.classList.remove('hidden');
-ordersContainer.appendChild(ordersContent);
-} else {
-ordersContainer.innerHTML = '<p class="text-gray-400 italic">Aucune commande</p>';
-}
+// Configurer le bouton SMS
+const smsButton = document.getElementById('sms-client-btn');
+const phoneNumber = this.dataset.userPhone.replace(/[^\d+]/g, '');
+smsButton.href = `sms:${phoneNumber}`;
 
 // Afficher le modal
 modal.classList.remove('hidden');
