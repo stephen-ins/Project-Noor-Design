@@ -108,10 +108,10 @@ final class IndexController extends AbstractController
             foreach ($wishlistItems as $item) {
                 $productsInWishlist[$item->getProduct()->getId()] = true;
             }
-            
+
             // Filtrer les produits pour n'afficher que ceux dans la wishlist si demandé
             if ($wishlistOnly) {
-                $allProducts = array_filter($allProducts, function($product) use ($productsInWishlist) {
+                $allProducts = array_filter($allProducts, function ($product) use ($productsInWishlist) {
                     return isset($productsInWishlist[$product->getId()]);
                 });
             }
