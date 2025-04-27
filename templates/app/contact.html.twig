@@ -88,7 +88,7 @@
 				<p class="text-sm text-gray-600 mb-8">
 					Les champs marqués d'un astérisque (*) sont obligatoires.
 				</p>
-				<form class="space-y-6">
+				<form action="{{ path('app_contact_submit') }}" method="post" class="space-y-6">
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 						<div>
 							<label for="firstname" class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
@@ -134,7 +134,7 @@
 						<input type="checkbox" id="privacy" name="privacy" required class="mt-1 mr-2"/>
 						<label for="privacy" class="text-sm text-gray-600">
 							J'accepte que mes données soient traitées conformément à la
-							<a href="#" class="text-gold hover:underline">politique de confidentialité</a>
+							<a href="{{ path('app_pdc') }}" class="text-gold hover:underline">politique de confidentialité</a>
 							de Noor Design.
 						</label>
 					</div>
