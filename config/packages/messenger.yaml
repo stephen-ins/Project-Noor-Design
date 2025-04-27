@@ -21,8 +21,8 @@ framework:
       messenger.bus.default: []
 
     routing:
-      # Activer la mise en file d'attente des emails pour éviter les erreurs d'envoi
-      Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+      # Utiliser le transport synchrone pour envoyer les emails immédiatement
+      Symfony\Component\Mailer\Messenger\SendEmailMessage: sync
       Symfony\Component\Notifier\Message\ChatMessage: async
       Symfony\Component\Notifier\Message\SmsMessage: async
 
