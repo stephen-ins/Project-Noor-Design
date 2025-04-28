@@ -88,65 +88,68 @@
 				<p class="text-sm text-gray-600 mb-8">
 					Les champs marqués d'un astérisque (*) sont obligatoires.
 				</p>
-				<form action="{{ path('app_contact_submit') }}" method="post" class="space-y-6">
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div>
-							<label for="firstname" class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-							<input type="text" id="firstname" name="firstname" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Votre prénom"/>
-						</div>
-						<div>
-							<label for="lastname" class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-							<input type="text" id="lastname" name="lastname" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Votre nom"/>
-						</div>
-					</div>
 
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div>
-							<label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-							<input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold" placeholder="votre@email.com"/>
+				{# Affichage des messages flash #}
+				{% for label, messages in app.flashes %}
+					{% for message in messages %}
+						<div class="mb-4 p-4 rounded-md {% if label == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+							{{ message }}
 						</div>
-						<div>
-							<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-							<input type="tel" id="phone" name="phone" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Votre numéro de téléphone"/>
-						</div>
-					</div>
+					{% endfor %}
+				{% endfor %}
 
+				{{ form_start(formContact) }}
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Sujet *</label>
-						<select id="subject" name="subject" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold">
-							<option value="">Sélectionnez un sujet</option>
-							<option value="commande">Question sur une commande</option>
-							<option value="bijoux">Renseignement sur les bijoux</option>
-							<option value="custom">Demande de création sur-mesure</option>
-							<option value="collaboration">
-								Proposition de collaboration
-							</option>
-							<option value="autre">Autre</option>
-						</select>
+						{{ form_label(formContact.firstname, 'Prénom *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(formContact.firstname, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold', 'placeholder': 'Votre prénom'}}) }}
+						{{ form_errors(formContact.firstname, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
 					</div>
-
 					<div>
-						<label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message *</label>
-						<textarea id="message" name="message" rows="5" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Votre message..."></textarea>
+						{{ form_label(formContact.lastname, 'Nom *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(formContact.lastname, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold', 'placeholder': 'Votre nom'}}) }}
+						{{ form_errors(formContact.lastname, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
 					</div>
+				</div>
 
-					<div class="flex items-start">
-						<input type="checkbox" id="privacy" name="privacy" required class="mt-1 mr-2"/>
-						<label for="privacy" class="text-sm text-gray-600">
-							J'accepte que mes données soient traitées conformément à la
-							<a href="{{ path('app_pdc') }}" class="text-gold hover:underline">politique de confidentialité</a>
-							de Noor Design.
-						</label>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+					<div>
+						{{ form_label(formContact.email, 'Email *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(formContact.email, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold', 'placeholder': 'votre@email.com'}}) }}
+						{{ form_errors(formContact.email, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
 					</div>
+					<div>
+						{{ form_label(formContact.phone, 'Téléphone', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+						{{ form_widget(formContact.phone, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold', 'placeholder': 'Votre numéro de téléphone'}}) }}
+						{{ form_errors(formContact.phone, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
+					</div>
+				</div>
 
-					<div class="text-right">
-						<button type="submit" class="bg-gold text-white px-6 py-3 rounded-md hover:bg-gold-dark transition">
-							Envoyer le message
-						</button>
-					</div>
-				</form>
+				<div class="mt-6">
+					{{ form_label(formContact.subject, 'Sujet *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(formContact.subject, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold'}}) }}
+					{{ form_errors(formContact.subject, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
+				</div>
+
+				<div class="mt-6">
+					{{ form_label(formContact.message, 'Message *', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+					{{ form_widget(formContact.message, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold', 'placeholder': 'Votre message...', 'rows': 5}}) }}
+					{{ form_errors(formContact.message, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
+				</div>
+
+				<div class="flex items-start mt-6">
+					{{ form_widget(formContact.privacy, {'attr': {'class': 'mt-1 mr-2'}}) }}
+					{{ form_label(formContact.privacy, "J'accepte que mes données soient traitées conformément à la <a href=\"" ~ path('app_pdc') ~ "\" class=\"text-gold hover:underline\">politique de confidentialité</a> de Noor Design."|raw, {'label_attr': {'class': 'text-sm text-gray-600'}, 'label_html': true}) }}
+					{{ form_errors(formContact.privacy, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
+				</div>
+
+				<div class="text-right mt-6">
+					<button type="submit" class="bg-gold text-white px-6 py-3 rounded-md hover:bg-gold-dark transition">
+						Envoyer le message
+					</button>
+				</div>
+				{{ form_end(formContact) }}
 			</div>
 		</div>
-	</section>
-
-{% endblock %}
+	</div>
+</section>{% endblock %}
