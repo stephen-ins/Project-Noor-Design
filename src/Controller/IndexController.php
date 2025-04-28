@@ -186,14 +186,14 @@ final class IndexController extends AbstractController
         return $this->redirectToRoute('app_login');
     }
 
-    // route pour la page contact
-    #[Route('/contact', name: 'app_contact')]
-    public function contact(): Response
-    {
-        return $this->render('app/contact.html.twig', [
-            'controller_name' => 'Contact',
-        ]);
-    }
+    // // route pour la page contact
+    // #[Route('/contact', name: 'app_contact')]
+    // public function contact(): Response
+    // {
+    //     return $this->render('app/contact.html.twig', [
+    //         'controller_name' => 'Contact',
+    //     ]);
+    // }
 
     // route pour la page mentions légales
     #[Route('/mentions', name: 'app_mentions')]
