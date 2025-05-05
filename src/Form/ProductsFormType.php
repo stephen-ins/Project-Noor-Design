@@ -81,7 +81,7 @@ class ProductsFormType extends AbstractType
                 'required' => false,
                 'constraints' => [
                     new File([
-                        'maxSize' => '10240k',
+                        'maxSize' => '50M',
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',

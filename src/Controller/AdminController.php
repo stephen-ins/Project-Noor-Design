@@ -92,7 +92,7 @@ final class AdminController extends AbstractController
 
         // Nombre de produits en rupture de stock
         $countOutOfStockProducts = $productsRepository->count(['stock' => 0]);
-        
+
         // Liste des produits en rupture de stock (stock = 0)
         $outOfStockProducts = $productsRepository->findBy(['stock' => 0], ['nom' => 'ASC'], 10);
 
@@ -487,24 +487,24 @@ final class AdminController extends AbstractController
     {
         $userId = $request->attributes->get('userId');
         $orderRepository = $entityManager->getRepository(Orders::class);
-        
+
         if ($userId) {
             // Si un ID d'utilisateur est fourni, filtrer pour ce client spécifique
             $user = $entityManager->getRepository(Users::class)->find($userId);
-            
+
             if (!$user) {
                 $this->addFlash('error', 'Le client demandé n\'existe pas.');
                 return $this->redirectToRoute('app_admin_users');
             }
-            
+
             $orders = $orderRepository->findBy(['user' => $user], ['date_commande' => 'DESC']);
-            
+
             return $this->render('admin/admin.user.orders.html.twig', [
                 'orders' => $orders,
                 'user' => $user
             ]);
         }
-        
+
         // Si aucun ID d'utilisateur n'est fourni, afficher toutes les commandes
         $orders = $orderRepository->findBy([], ['date_commande' => 'DESC']);
 
