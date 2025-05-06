@@ -545,8 +545,6 @@ final class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin_order_show', ['id' => $order->getId()]);
     }
 
-
-
     // route pour la gestion des clients
     #[Route('/users', name: 'app_admin_users')]
     public function users(UsersRepository $usersRepository): Response
@@ -609,7 +607,6 @@ final class AdminController extends AbstractController
             'controller_name' => 'AdminController',
         ]);
     }
-
     // route pour la gestion des wishlists
     #[Route('/wish', name: 'app_admin_wish')]
     public function wishlist(EntityManagerInterface $entityManager): Response

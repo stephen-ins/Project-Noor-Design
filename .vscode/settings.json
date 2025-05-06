@@ -1,3 +1,9 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "editor.fontFamily": "CommitMono-Stephen",
+    "editor.fontSize": 14,
+    "files.autoSave": "afterDelay",
+    "terminal.integrated.fontLigatures.enabled": false,
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "terminal.integrated.fontSize": 12
 }
