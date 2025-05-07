@@ -16,10 +16,18 @@ final class IndexController extends AbstractController
 
     // route pour la page d'accueil
     #[Route('/', name: 'app_home')]
-    public function index(): Response
+    public function index(ProductsRepository $productsRepository): Response
     {
+        // Récupérer les 3 produits les plus vendus
+        $bestSellers = $productsRepository->findBestSellers(3);
+
+        // Récupérer les 3 derniers produits ajoutés
+        $latestProducts = $productsRepository->findBy([], ['date_ajout' => 'DESC'], 3);
+
         return $this->render('app/index.html.twig', [
             'controller_name' => 'Home',
+            'bestSellers' => $bestSellers,
+            'latestProducts' => $latestProducts,
         ]);
     }
 

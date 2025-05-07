@@ -88,6 +88,13 @@ class OrderController extends AbstractController
             // Mettre à jour le stock du produit
             $product->setStock($product->getStock() - $quantity);
 
+            // Incrémenter le nombre de ventes du produit
+            if (method_exists($product, 'getNombreVentes') && method_exists($product, 'setNombreVentes')) {
+                // Si le produit a un compteur de nombreVentes, l'incrémenter
+                $nombreVentes = $product->getNombreVentes() ?? 0; // Valeur par défaut 0 si null
+                $product->setNombreVentes($nombreVentes + $quantity);
+            }
+
             // Ajouter le détail à la commande
             $order->addOrderDetail($orderDetail);
 
