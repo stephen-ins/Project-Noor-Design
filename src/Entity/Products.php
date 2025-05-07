@@ -51,6 +51,9 @@ class Products
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $statut = null;
 
+    #[ORM\Column(options: ["default" => 0])]
+    private int $nombreVentes = 0;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -206,6 +209,18 @@ class Products
     public function setStatut(?string $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getNombreVentes(): ?int
+    {
+        return $this->nombreVentes;
+    }
+
+    public function setNombreVentes(int $nombreVentes): static
+    {
+        $this->nombreVentes = $nombreVentes;
 
         return $this;
     }

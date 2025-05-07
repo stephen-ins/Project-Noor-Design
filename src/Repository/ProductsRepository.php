@@ -16,6 +16,15 @@ class ProductsRepository extends ServiceEntityRepository
         parent::__construct($registry, Products::class);
     }
 
+    public function findBestSellers(int $limit = 3): array
+    {
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.nombreVentes', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Products[] Returns an array of Products objects
     //     */
