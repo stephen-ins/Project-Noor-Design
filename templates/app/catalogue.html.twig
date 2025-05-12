@@ -76,82 +76,83 @@
 						Réinitialiser
 					</a>
 
-					</div>
 				</div>
-			</form>
-	
-			<!-- Tableau des produits -->
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+			</div>
+		</form>
 
-				<!-- Affichage des produits de la BDD par tour de boucle -->
-				{% for productDetail in allProducts %}
+		<!-- Tableau des produits -->
+		<div
+			class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
+			<!-- Affichage des produits de la BDD par tour de boucle -->
+			{% for productDetail in allProducts %}
+
+				<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
 					<a href="{{ path('app_produit', {'id': productDetail.id}) }}">
-						<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
-							<div
-								class="overflow-hidden">
-								{# Voir avec la cliente si object-cover conviendrait pour l affichage des photos #}
-								<img src="{{ asset('uploads/products/' ~ productDetail.image) }}" alt="{{ productDetail.nom }}" class="w-full h-80 object-contain"/>
+						<div
+							class="overflow-hidden">
+							{# Voir avec la cliente si object-cover conviendrait pour l affichage des photos #}
+							<img src="{{ asset('uploads/products/' ~ productDetail.image) }}" alt="{{ productDetail.nom }}" class="w-full h-80 object-contain"/>
+						</div>
+
+						<div class="product-content flex flex-col flex-grow">
+							<div class="p-6 pb-2">
+								<h3 class="text-xl font-semibold text-gray-800">
+									{{ productDetail.nom }}
+								</h3>
+								<p class="text-gray-600 mt-2 text-sm">
+									{{ productDetail.description }}
+								</p>
 							</div>
 
-							<div class="product-content flex flex-col flex-grow">
-								<div class="p-6 pb-2">
-									<h3 class="text-xl font-semibold text-gray-800">
-										{{ productDetail.nom }}
-									</h3>
-									<p class="text-gray-600 mt-2 text-sm">
-										{{ productDetail.description }}
-									</p>
-								</div>
-
-								<div class="p-6 pt-4 mt-auto border-t border-gray-100">
-									<div class="flex justify-between items-center">
-										<div>
-											{% if productDetail.stock > 0 %}
-												<span class="text-green-600 font-medium">En stock</span>
-												<span class="text-gray-500 text-sm ml-2">{{ productDetail.stock }}
-													articles restants</span>
+							<div class="p-6 pt-4 mt-auto border-t border-gray-100">
+								<div class="flex justify-between items-center">
+									<div>
+										{% if productDetail.stock > 0 %}
+											<span class="text-green-600 font-medium">En stock</span>
+											<span class="text-gray-500 text-sm ml-2">{{ productDetail.stock }}
+												articles restants</span>
+										{% else %}
+											<span class="text-red-600 font-medium">Rupture de stock</span>
+										{% endif %}
+									</div>
+									<div>
+										{% if app.user %}
+											{% if productsInWishlist[productDetail.id] is defined %}
+												<a href="{{ path('wishlist_remove', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Retirer de ma liste de souhaits">
+													<i class="fa-solid fa-heart text-red-600 text-xl hover:text-red-700 transition"></i>
+												</a>
 											{% else %}
-												<span class="text-red-600 font-medium">Rupture de stock</span>
+												<a href="{{ path('wishlist_add', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Ajouter à ma liste de souhaits">
+													<i class="fa-regular fa-heart text-gray-500 text-xl hover:text-red-600 transition"></i>
+												</a>
 											{% endif %}
-										</div>
-										<div>
-											{% if app.user %}
-												{% if productsInWishlist[productDetail.id] is defined %}
-													<a href="{{ path('wishlist_remove', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Retirer de ma liste de souhaits">
-														<i class="fa-solid fa-heart text-red-600 text-xl hover:text-red-700 transition"></i>
-													</a>
-												{% else %}
-													<a href="{{ path('wishlist_add', {'id': productDetail.id}) }}" class="wishlist-toggle" title="Ajouter à ma liste de souhaits">
-														<i class="fa-regular fa-heart text-gray-500 text-xl hover:text-red-600 transition"></i>
-													</a>
-												{% endif %}
-											{% endif %}
-										</div>
+										{% endif %}
 									</div>
 								</div>
+							</div>
 
-								<div class="p-6 pt-2 mt-auto border-t border-gray-100 flex justify-between items-center">
-									<span class="text-gold font-bold">{{ productDetail.prix }}
-										€</span>
-									<span class="text-gold hover:underline">Voir détails</span>
-								</div>
+							<div class="p-6 pt-2 mt-auto border-t border-gray-100 flex justify-between items-center">
+								<span class="text-gold font-bold">{{ productDetail.prix }}
+									€</span>
+								<span class="text-gold hover:underline">Voir détails</span>
 							</div>
 						</div>
 					</a>
-				{% endfor %}
-			</div>
-
-			<!-- Pagination -->
-			<div class="flex justify-center mt-12">
-				<nav class="inline-flex rounded-md shadow">
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-l-md">Précédent</a>
-					<a href="#" class="py-2 px-4 bg-gold text-white border border-gold">1</a>
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">2</a>
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">3</a>
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-r-md">Suivant</a>
-				</nav>
-			</div>
+				</div>
+			{% endfor %}
 		</div>
 
-	{% endblock %}
+		<!-- Pagination -->
+		<div class="flex justify-center mt-12">
+			<nav class="inline-flex rounded-md shadow">
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-l-md">Précédent</a>
+				<a href="#" class="py-2 px-4 bg-gold text-white border border-gold">1</a>
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">2</a>
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">3</a>
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-r-md">Suivant</a>
+			</nav>
+		</div>
+	</div>
+
+{% endblock %}
