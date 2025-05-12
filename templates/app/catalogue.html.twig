@@ -77,15 +77,18 @@
 					</a>
 
 				</div>
-			</form>
+			</div>
+		</form>
 
-			<!-- Tableau des produits -->
-			<div
-				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+		<!-- Tableau des produits -->
+		<div
+			class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
-				<!-- Affichage des produits de la BDD par tour de boucle -->
-				{% for productDetail in allProducts %}
-					<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
+			<!-- Affichage des produits de la BDD par tour de boucle -->
+			{% for productDetail in allProducts %}
+
+				<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
+					<a href="{{ path('app_produit', {'id': productDetail.id}) }}">
 						<div
 							class="overflow-hidden">
 							{# Voir avec la cliente si object-cover conviendrait pour l affichage des photos #}
@@ -132,23 +135,24 @@
 							<div class="p-6 pt-2 mt-auto border-t border-gray-100 flex justify-between items-center">
 								<span class="text-gold font-bold">{{ productDetail.prix }}
 									€</span>
-								<a href="{{ path('app_produit', {'id': productDetail.id}) }}" class="text-gold hover:underline">Voir détails</a>
+								<span class="text-gold hover:underline">Voir détails</span>
 							</div>
 						</div>
-					</div>
-				{% endfor %}
-			</div>
-
-			<!-- Pagination -->
-			<div class="flex justify-center mt-12">
-				<nav class="inline-flex rounded-md shadow">
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-l-md">Précédent</a>
-					<a href="#" class="py-2 px-4 bg-gold text-white border border-gold">1</a>
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">2</a>
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">3</a>
-					<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-r-md">Suivant</a>
-				</nav>
-			</div>
+					</a>
+				</div>
+			{% endfor %}
 		</div>
 
-	{% endblock %}
+		<!-- Pagination -->
+		<div class="flex justify-center mt-12">
+			<nav class="inline-flex rounded-md shadow">
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-l-md">Précédent</a>
+				<a href="#" class="py-2 px-4 bg-gold text-white border border-gold">1</a>
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">2</a>
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">3</a>
+				<a href="#" class="py-2 px-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-r-md">Suivant</a>
+			</nav>
+		</div>
+	</div>
+
+{% endblock %}
