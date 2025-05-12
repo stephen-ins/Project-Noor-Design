@@ -76,17 +76,17 @@
 						Réinitialiser
 					</a>
 
+					</div>
 				</div>
 			</form>
-
+	
 			<!-- Tableau des produits -->
-			<div
-				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
 				<!-- Affichage des produits de la BDD par tour de boucle -->
 				{% for productDetail in allProducts %}
-					<a href="{{ path('app_produit', {'id': productDetail.id}) }}" >
 
+					<a href="{{ path('app_produit', {'id': productDetail.id}) }}">
 						<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition product-card flex flex-col">
 							<div
 								class="overflow-hidden">
