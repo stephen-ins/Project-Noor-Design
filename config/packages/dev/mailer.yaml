@@ -1,3 +1,4 @@
+# Override mailer DSN for dev environment
 framework:
     mailer:
-        dsn: 'file://%kernel.project_dir%/var/mail'
+        dsn: 'null://null'
