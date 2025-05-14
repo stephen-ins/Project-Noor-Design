@@ -58,6 +58,8 @@
 						<span class="text-sm font-medium">
 							{% if error.messageKey == 'Invalid credentials.' %}
 								Identifiants et mots de passe incorrects. Veuillez vérifier à nouveau votre saisie.
+							{% elseif error.messageKey starts with 'Veuillez confirmer votre adresse email' %}
+								{{ error.messageKey|raw }}
 							{% else %}
 								{{ error.messageKey|trans(error.messageData, 'security') }}
 							{% endif %}
@@ -104,7 +106,7 @@
 			<div class="mt-8 pt-6 border-t border-gray-200 text-center">
 				<p class="text-gray-600">
 					Je n'ai pas encore de compte ?
-					<a href="{{ path('app_registration') }}" class="text-gold hover:underline">Créer un compte</a>
+					<a href="{{ path('app_user_registration') }}" class="text-gold hover:underline">Créer un compte</a>
 				</p>
 			</div>
 

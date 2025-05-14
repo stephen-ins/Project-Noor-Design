@@ -1,0 +1,4 @@
+# Override mailer DSN for dev environment
+framework:
+    mailer:
+        dsn: 'null://null'
