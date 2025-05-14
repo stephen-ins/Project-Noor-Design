@@ -42,8 +42,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
         if ($user && !$user->isVerified()) {
             throw new CustomUserMessageAuthenticationException(
-                'Veuillez confirmer votre adresse email avant de vous connecter. 
-                <a href="' . $this->urlGenerator->generate('app_verify_resend_email') . '">Renvoyer l\'email de vérification</a>'
+                'Veuillez confirmer votre adresse email avant de vous connecter. ' .
+                    '<a href="' . $this->urlGenerator->generate('app_verify_resend_email') . '">Renvoyer l\'email de vérification</a>'
             );
         }
 
