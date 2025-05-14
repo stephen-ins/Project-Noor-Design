@@ -1,3 +1,6 @@
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
+        # Configuration pour le développement : enregistrer les emails dans un fichier
+        envelope:
+            sender: 'contact@noordesign.stephen-ins.com'
