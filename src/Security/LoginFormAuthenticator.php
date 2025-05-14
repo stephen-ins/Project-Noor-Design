@@ -41,9 +41,11 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $user = $this->entityManager->getRepository(Users::class)->findOneBy(['email' => $email]);
 
         if ($user && !$user->isVerified()) {
+            // Création d'un lien qui inclut l'email de l'utilisateur pour faciliter le renvoi
+            $resendUrl = $this->urlGenerator->generate('app_verify_resend_email', ['email' => $email]);
             throw new CustomUserMessageAuthenticationException(
                 'Veuillez confirmer votre adresse email avant de vous connecter. ' .
-                    '<a href="' . $this->urlGenerator->generate('app_verify_resend_email') . '">Renvoyer l\'email de vérification</a>'
+                    '<a href="' . $resendUrl . '">Renvoyer l\'email de vérification</a>'
             );
         }
 
