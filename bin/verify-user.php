@@ -3,11 +3,12 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/bootstrap.php';
 
+use App\Entity\Users;
 use Symfony\Component\Dotenv\Dotenv;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\SecurityBundle\Security;
 
 // Charger l'application Symfony
 $kernel = new \App\Kernel('dev', true);
