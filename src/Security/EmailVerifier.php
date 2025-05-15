@@ -16,15 +16,15 @@ class EmailVerifier
         private VerifyEmailHelperInterface $verifyEmailHelper,
         private MailerInterface $mailer,
         private EntityManagerInterface $entityManager
-    ) {
-    }
+    ) {}
 
     public function sendEmailConfirmation(string $verifyEmailRouteName, Users $user, TemplatedEmail $email): void
     {
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
             $verifyEmailRouteName,
             (string) $user->getId(),
-            (string) $user->getEmail()
+            (string) $user->getEmail(),
+            ['id' => $user->getId()]
         );
 
         $context = $email->getContext();
@@ -42,10 +42,13 @@ class EmailVerifier
      */
     public function handleEmailConfirmation(Request $request, Users $user): void
     {
+        // Valide la signature du lien de vérification d'email
         $this->verifyEmailHelper->validateEmailConfirmationFromRequest($request, (string) $user->getId(), (string) $user->getEmail());
 
+        // Marque l'utilisateur comme vérifié
         $user->setIsVerified(true);
 
+        // Persiste les modifications
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }

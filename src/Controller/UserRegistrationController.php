@@ -72,7 +72,7 @@ final class UserRegistrationController extends AbstractController
             );
 
             // Ajout d'un message flash de succès
-            $this->addFlash('success', 'Votre compte a été créé avec succès ! Un email de vérification vous a été envoyé. Veuillez vérifier votre boite de réception.');
+            $this->addFlash('success', 'Votre compte a été créé avec succès ! Un email de vérification vous a été envoyé. Veuillez vérifier votre boite de réception ainsi que vos spams.');
 
             // Redirection vers la page de connexion
             return $this->redirectToRoute('app_login');
@@ -88,24 +88,26 @@ final class UserRegistrationController extends AbstractController
     #[Route('/verify/email', name: 'app_verify_email')]
     public function verifyUserEmail(Request $request, TranslatorInterface $translator, EntityManagerInterface $entityManager): Response
     {
+        // Récupérer l'ID directement depuis la requête
+        $id = $request->query->get('id');
+        if (!$id) {
+            $this->addFlash('error', 'Lien de vérification incorrect. Aucun identifiant utilisateur trouvé.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $user = $entityManager->getRepository(Users::class)->find($id);
+        if (!$user) {
+            $this->addFlash('error', 'Utilisateur non trouvé.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Si l'utilisateur est déjà vérifié
+        if ($user->isVerified()) {
+            $this->addFlash('info', 'Votre adresse email est déjà vérifiée. Vous pouvez vous connecter.');
+            return $this->redirectToRoute('app_login');
+        }
+
         try {
-            // Vérifie si l'utilisateur est connecté
-            $user = $this->getUser();
-
-            // Si l'utilisateur n'est pas connecté, on vérifie s'il y a un token dans la requête
-            if (!$user) {
-                $id = $request->query->get('id');
-                if ($id) {
-                    $user = $entityManager->getRepository(Users::class)->find($id);
-                    if (!$user) {
-                        throw new \Exception('Utilisateur non trouvé');
-                    }
-                } else {
-                    $this->addFlash('error', 'Vous devez être connecté pour vérifier votre adresse email');
-                    return $this->redirectToRoute('app_login');
-                }
-            }
-
             // Valide le lien de confirmation d'email, définit User::isVerified=true et persiste
             $this->emailVerifier->handleEmailConfirmation($request, $user);
         } catch (VerifyEmailExceptionInterface $exception) {
@@ -114,24 +116,36 @@ final class UserRegistrationController extends AbstractController
         }
 
         // Message de succès
-        $this->addFlash('success', 'Votre adresse email a été vérifiée avec succès. Vous pouvez maintenant profiter pleinement des services de Noor Design');
+        $this->addFlash('success', 'Votre adresse email a été vérifiée avec succès. Vous pouvez maintenant profiter pleinement des services de Noor Design.');
 
-        // Redirection vers la page d'accueil
-        return $this->redirectToRoute('app_home');
+        // Redirection vers la page de connexion plutôt que la page d'accueil
+        return $this->redirectToRoute('app_login');
     }
 
     #[Route('/verify/resend', name: 'app_verify_resend_email')]
-    public function resendVerifyEmail(Request $request): Response
+    public function resendVerifyEmail(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $email = $request->query->get('email');
+
+        // Si l'utilisateur est connecté, on utilise ses informations
         $user = $this->getUser();
-        if (!$user) {
-            $this->addFlash('error', 'Vous devez être connecté pour demander un nouvel email de vérification');
+
+        // Si l'utilisateur n'est pas connecté mais qu'un email est fourni
+        if (!$user && $email) {
+            $user = $entityManager->getRepository(Users::class)->findOneBy(['email' => $email]);
+
+            if (!$user) {
+                $this->addFlash('error', 'Aucun compte trouvé avec cette adresse email.');
+                return $this->redirectToRoute('app_login');
+            }
+        } elseif (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté ou fournir une adresse email pour demander un nouvel email de vérification.');
             return $this->redirectToRoute('app_login');
         }
 
         if ($user->isVerified()) {
-            $this->addFlash('success', 'Votre adresse email est déjà vérifiée');
-            return $this->redirectToRoute('app_home');
+            $this->addFlash('success', 'Votre adresse email est déjà vérifiée. Vous pouvez vous connecter.');
+            return $this->redirectToRoute('app_login');
         }
 
         // Envoi d'un nouvel email de vérification
@@ -149,6 +163,6 @@ final class UserRegistrationController extends AbstractController
         );
 
         $this->addFlash('success', 'Un nouvel email de vérification a été envoyé. Veuillez vérifier votre boite de réception.');
-        return $this->redirectToRoute('app_home');
+        return $this->redirectToRoute('app_login');
     }
 }
