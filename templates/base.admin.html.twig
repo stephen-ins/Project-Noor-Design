@@ -29,7 +29,7 @@
 				</label>
 
 				<nav id="sidebar" class="fixed md:static w-64 bg-gray-900 min-h-screen transition-all duration-300
-																																																														peer-checked:translate-x-0 -translate-x-full md:translate-x-0 z-40" style="background-color: var(--color-bg-footer);">
+										peer-checked:translate-x-0 -translate-x-full md:translate-x-0 z-40" style="background-color: var(--color-bg-footer);">
 					<div class="sticky top-0 p-4">
 						<div class="text-center mt-5 mb-16">
 							<h4 class="text-white text-xl font-semibold">Noor Design</h4>
@@ -37,55 +37,55 @@
 						</div>
 						<ul class="space-y-6">
 							<li>
-								<a class="flex items-center text-white bg-gray-500 px-4 py-2 rounded" href="{{ path('app_admin_index') }}">
+								<a class="flex items-center {% if app.request.get('_route') == 'app_admin_index' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_index') }}">
 									<i class="bi bi-house-door mr-2"></i>
 									Tableau de bord
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_admin_products') }}">
+								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_products' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_products') }}">
 									<i class="bi bi-gem mr-2"></i>
 									Produits
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_admin_categories') }}">
+								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_categories' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_categories') }}">
 									<i class="bi bi-tags mr-2"></i>
 									Catégories
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_admin_orders') }}">
+								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_orders' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_orders') }}">
 									<i class="bi bi-box-seam mr-2"></i>
 									Commandes
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_admin_users') }}">
+								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_users' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_users') }}">
 									<i class="bi bi-people mr-2"></i>
 									Clients
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_admin_wish') }}">
+								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_wish' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_wish') }}">
 									<i class="bi bi-heart mr-2"></i>
 									Wishlists
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_admin_comments') }}">
+								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_comments' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_comments') }}">
 									<i class="bi bi-star mr-2"></i>
 									Avis clients
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_admin_messages') }}">
+								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_messages' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_messages') }}">
 									<i class="bi bi-envelope mr-2"></i>
 									Messagerie
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center text-gray-300 hover:bg-gray-700 px-4 py-2 rounded" href="{{ path('app_home') }}">
+								<a class="flex items-center {% if app.request.get('_route') == 'app_home' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_home') }}">
 									<i class="bi bi-box-arrow-right mr-2"></i>
 									Accueil
 								</a>
