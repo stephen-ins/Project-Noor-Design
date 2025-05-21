@@ -79,9 +79,14 @@
 								</a>
 							</li>
 							<li>
-								<a class="flex items-center {% if app.request.get('_route') starts with 'app_admin_messages' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_messages') }}">
-									<i class="bi bi-envelope mr-2"></i>
-									Messagerie
+								<a class="flex items-center justify-between {% if app.request.get('_route') starts with 'app_admin_messages' %}text-white bg-gray-500{% else %}text-gray-300 hover:bg-gray-700{% endif %} px-4 py-2 rounded" href="{{ path('app_admin_messages') }}">
+									<div>
+										<i class="bi bi-envelope mr-2"></i>
+										Messagerie
+									</div>
+									{% if app.request.attributes.has('unreadCount') and app.request.attributes.get('unreadCount') > 0 %}
+										<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-2">{{ app.request.attributes.get('unreadCount') }}</span>
+									{% endif %}
 								</a>
 							</li>
 							<li>

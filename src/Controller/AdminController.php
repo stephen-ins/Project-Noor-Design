@@ -599,14 +599,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    // route pour la gestion des messages boite de contact
-    #[Route('/messages', name: 'app_admin_messages')]
-    public function messages(): Response
-    {
-        return $this->render('admin/admin.messages.html.twig', [
-            'controller_name' => 'AdminController',
-        ]);
-    }
+    // La gestion des messages est maintenant gérée par MessageAdminController
     // route pour la gestion des wishlists
     #[Route('/wish', name: 'app_admin_wish')]
     public function wishlist(EntityManagerInterface $entityManager): Response

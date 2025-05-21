@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\DTO\Contact;
+use App\Entity\Message;
 use App\Form\ContactType;
+use App\Repository\MessageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +40,7 @@ class ContactController extends AbstractController
     }
 
     #[Route('/contact/submit', name: 'app_contact_submit', methods: ['POST'])]
-    public function submit(Request $request, MailerInterface $mailer): Response
+    public function submit(Request $request, MailerInterface $mailer, MessageRepository $messageRepository): Response
     {
         $contact = new Contact();
         $formContact = $this->createForm(ContactType::class, $contact);
@@ -46,6 +48,17 @@ class ContactController extends AbstractController
 
         if ($formContact->isSubmitted() && $formContact->isValid()) {
             try {
+                // Sauvegarder le message en base de données
+                $message = new Message();
+                $message->setFirstname($contact->getFirstname());
+                $message->setLastname($contact->getLastname());
+                $message->setEmail($contact->getEmail());
+                $message->setPhone($contact->getPhone());
+                $message->setSubject($contact->getSubject());
+                $message->setMessage($contact->getMessage());
+
+                $messageRepository->save($message, true);
+
                 // Création et envoi de l'email
                 $email = (new Email())
                     ->from('contact@noordesign.stephen-ins.com')
