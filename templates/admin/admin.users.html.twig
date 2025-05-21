@@ -11,18 +11,6 @@
 		<!-- Header -->
 		<div class="flex justify-between items-center border-b pb-4 mb-6">
 			<h1 class="text-2xl font-semibold">Gestion des Clients</h1>
-			<div class="flex items-center space-x-4">
-				<div class="relative">
-					<input type="text" id="search-users" placeholder="Rechercher un client..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-					<i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
-				</div>
-				<select id="filter-users" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-					<option value="all">Tous les clients</option>
-					<option value="admin">Administrateurs</option>
-					<option value="user">Utilisateurs</option>
-					<option value="recent">Inscrits récents</option>
-				</select>
-			</div>
 		</div>
 
 		<!-- Messages flash -->
@@ -37,7 +25,7 @@
 		<!-- Tableau des clients -->
 		<div class="bg-white rounded-lg shadow overflow-hidden">
 			<div class="overflow-x-auto">
-				<table class="min-w-full divide-y divide-gray-200">
+				<table class="min-w-full divide-y divide-gray-200" id="users-table">
 					<thead class="bg-gray-50">
 						<tr>
 							<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
@@ -50,7 +38,7 @@
 						</tr>
 					</thead>
 					<tbody class="bg-white divide-y divide-gray-200" id="user-table-body">
-						{% if users is empty %}
+						{% if users is not defined or users is empty %}
 							<tr>
 								<td colspan="7" class="px-6 py-4 text-center text-gray-500">Aucun client trouvé</td>
 							</tr>
@@ -120,26 +108,15 @@
 			</div>
 		</div>
 
-		<!-- Pagination -->
+		<!-- La pagination est maintenant gérée par DataTables -->
 		<div class="mt-6 flex justify-between items-center">
 			<div class="text-sm text-gray-500">
 				Affichage de
-				<span id="showing-count">
-					{% if users is not empty %}
-						{{ users|length }}{% else %}0
-					{% endif %}
-				</span>
+				<span id="showing-count">0</span>
 				clients sur
-				<span id="total-count">
-					{% if users is not empty %}
-						{{ users|length }}{% else %}0
-					{% endif %}
-				</span>
+				<span id="total-count">0</span>
 			</div>
-			<div class="flex space-x-2">
-				<button class="px-3 py-1 border rounded-md disabled:opacity-50" id="prev-page" disabled>Précédent</button>
-				<button class="px-3 py-1 border rounded-md disabled:opacity-50" id="next-page" disabled>Suivant</button>
-			</div>
+			<!-- Les boutons de pagination sont gérés par DataTables -->
 		</div>
 
 	</main>
@@ -204,92 +181,148 @@
 {% block javascripts %}
 	{{ parent() }}
 	<script>
-		document.addEventListener('DOMContentLoaded', function () { // Gestion de la recherche
-const searchInput = document.getElementById('search-users');
-searchInput.addEventListener('input', filterUsers);
-
-// Gestion du filtre
-const filterSelect = document.getElementById('filter-users');
-filterSelect.addEventListener('change', filterUsers);
-
-// Fonction pour filtrer les utilisateurs
-function filterUsers() {
-const searchTerm = searchInput.value.toLowerCase();
-const filterValue = filterSelect.value;
-const rows = document.querySelectorAll('.user-row');
-
-let visibleCount = 0;
-
-rows.forEach(row => {
-const userName = row.querySelector('.text-sm.font-medium.text-gray-900').textContent.toLowerCase();
-const userEmail = row.querySelector('td:nth-child(2) .text-sm').textContent.toLowerCase();
-const isAdmin = row.classList.contains('admin-user');
-
-let shouldShow = (userName.includes(searchTerm) || userEmail.includes(searchTerm));
-
-if (filterValue === 'admin' && ! isAdmin) 
-shouldShow = false;
-
-
-
-if (filterValue === 'user' && isAdmin) 
-shouldShow = false;
-
-
-
-row.style.display = shouldShow ? '' : 'none';
-if (shouldShow) 
-visibleCount++;
-
-
-
+		document.addEventListener('DOMContentLoaded', function () { // Initialisation de DataTables
+let usersTable = $('#users-table').DataTable({
+language: {
+url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json'
+},
+responsive: true,
+pageLength: 10,
+lengthMenu: [
+[
+5,
+10,
+25,
+50,
+-1
+],
+[
+5,
+10,
+25,
+50,
+"Tous"
+]
+],
+dom: '<"top"lf>rt<"bottom"ip>',
+columnDefs: [
+{
+"ordertable": false,
+"targets": 6
+} // Désactive le tri sur la colonne Actions
+],
+order: [
+[4, 'desc']
+],
+// Tri par défaut sur la date d'inscription (descendant)
+// Personnalisation des textes en français
+language: {
+processing: "Traitement en cours...",
+search: "Rechercher&nbsp;:",
+lengthMenu: "Afficher _MENU_ éléments",
+info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+infoEmpty: "Affichage de 0 à 0 sur 0 éléments",
+infoFiltered: "(filtré de _MAX_ éléments au total)",
+infoPostFix: "",
+loadingRecords: "Chargement en cours...",
+zeroRecords: "Aucun élément à afficher",
+emptyTable: "Aucune donnée disponible dans le tableau",
+paginate: {
+first: "Premier",
+previous: "Précédent",
+next: "Suivant",
+last: "Dernier"
+},
+aria: {
+sortAscending: ": activer pour trier la colonne par ordre croissant",
+sortDescending: ": activer pour trier la colonne par ordre décroissant"
+}
+}
 });
 
-document.getElementById('showing-count').textContent = visibleCount;
+// Gestion de la recherche personnalisée
+$('#search-users').on('keyup', function () {
+usersTable.search(this.value).draw();
+
+// Mise à jour du compteur d'affichage
+updateShowingCount(usersTable);
+});
+
+// Gestion du filtre personnalisé
+$('#filter-users').on('change', function () {
+const filterValue = $(this).val();
+
+// Réinitialisation de la recherche pour appliquer uniquement le filtre
+usersTable.search('').columns().search('').draw();
+
+// Application du filtre selon la sélection
+if (filterValue === 'admin') {
+usersTable.column(5).search('Admin').draw();
+} else if (filterValue === 'user') {
+usersTable.column(5).search('Client').draw();
+} else if (filterValue === 'recent') {
+// Filtre pour les utilisateurs inscrits au cours des 30 derniers jours (à adapter selon votre format de date)
+// Cette fonctionnalité peut nécessiter une personnalisation plus poussée selon le format de votre date
+usersTable.draw();
+} else { // "all" - afficher tous les utilisateurs
+usersTable.draw();
 }
+
+// Mise à jour du compteur d'affichage
+updateShowingCount(usersTable);
+});
+
+// Fonction pour mettre à jour le compteur d'affichage
+function updateShowingCount(table) {
+const info = table.page.info();
+$('#showing-count').text(info.recordsDisplay);
+$('#total-count').text(info.recordsTotal);
+}
+
+// Mise à jour initiale du compteur
+updateShowingCount(usersTable);
 
 // Gestion du modal de détails
 const modal = document.getElementById('user-detail-modal');
 const closeButtons = [document.getElementById('close-modal'), document.getElementById('close-modal-btn')];
 
 closeButtons.forEach(button => {
+if (button) {
 button.addEventListener('click', () => {
 modal.classList.add('hidden');
 });
+}
 });
 
 // Ouvrir le modal quand on clique sur l'icône de détails
-const viewButtons = document.querySelectorAll('.view-details');
-viewButtons.forEach(button => {
-button.addEventListener('click', function (e) {
+$('.view-details').on('click', function (e) {
 e.preventDefault();
-const userId = this.dataset.userId;
+const userId = $(this).data('user-id');
 
 // Récupérer les données directement des attributs data
-document.querySelector('.text-user-name').textContent = `${
-this.dataset.userPrenom
+$('.text-user-name').text(`${
+$(this).data('user-prenom')
 } ${
-this.dataset.userNom
-}`;
-document.querySelector('.text-user-email').textContent = this.dataset.userEmail;
-document.querySelector('.text-user-phone').textContent = this.dataset.userPhone;
-document.querySelector('.text-user-birthday').textContent = this.dataset.userBirthday;
-document.querySelector('.text-user-address').textContent = this.dataset.userAdresse;
+$(this).data('user-nom')
+}`);
+$('.text-user-email').text($(this).data('user-email'));
+$('.text-user-phone').text($(this).data('user-phone'));
+$('.text-user-birthday').text($(this).data('user-birthday'));
+$('.text-user-address').text($(this).data('user-adresse'));
 
 // Configurer le bouton mailto
 const contactButton = document.getElementById('contact-client-btn');
 contactButton.href = `mailto:${
-this.dataset.userEmail
+$(this).data('user-email')
 }`;
 
 // Configurer le bouton SMS
 const smsButton = document.getElementById('sms-client-btn');
-const phoneNumber = this.dataset.userPhone.replace(/[^\d+]/g, '');
+const phoneNumber = $(this).data('user-phone').replace(/[^\d+]/g, '');
 smsButton.href = `sms:${phoneNumber}`;
 
 // Afficher le modal
 modal.classList.remove('hidden');
-});
 });
 });
 	</script>

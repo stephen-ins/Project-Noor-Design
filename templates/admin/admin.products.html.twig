@@ -18,33 +18,6 @@
 			</button>
 		</div>
 
-		<!-- Filtre de recherche -->
-		<div class="bg-white p-4 rounded-lg shadow-sm mb-6">
-			<div class="flex flex-wrap gap-4">
-				<div class="flex-1 min-w-[200px]">
-					<input type="text" placeholder="Rechercher un produit..." class="w-full px-4 py-2 border rounded"/>
-				</div>
-				<div class="w-40">
-					<select class="w-full px-4 py-2 border rounded">
-						<option value="">Catégorie</option>
-						{% for category in categories %}
-							<option value="{{ category.id }}">{{ category.nom }}</option>
-						{% endfor %}
-					</select>
-				</div>
-				<div class="w-40">
-					<select class="w-full px-4 py-2 border rounded">
-						<option value="">Statut</option>
-						<option value="en_stock">En stock</option>
-						<option value="epuise">Épuisé</option>
-					</select>
-				</div>
-				<button class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-					Filtrer
-				</button>
-			</div>
-		</div>
-
 		<!-- Message d'erreur ou de succès pour ajout, modification ou suppression -->
 		{% if app.session.flashBag.has('success') %}
 			<div class="bg-green-100 text-green-800 p-4 rounded-lg mb-6">
@@ -60,106 +33,101 @@
 
 		<!-- Tableau des produits -->
 		<div class="bg-white rounded-lg shadow-sm overflow-hidden">
-			<table class="w-full text-left">
-				<thead class="bg-gray-100 border-b">
+			<table id="products-table" class="w-full text-left">
+				<thead class="bg-gray-50">
 					<tr>
-						<th class="px-2 py-4">P1</th>
-						<th class="px-2 py-4">P2</th>
-						<th class="px-2 py-4">P3</th>
-						<th class="px-1 py-2">ID</th>
-						<th class="px-1 py-2">Nom</th>
-						<th class="px-1 py-2">Catégorie</th>
-						<th class="px-1 py-2">Description</th>
-						<th class="px-1 py-2">Matière</th>
-						<th class="px-1 py-2">Taille</th>
-						<th class="px-1 py-2">Poids</th>
-						<th class="px-1 py-2">Prix TTC</th>
-						<th class="px-1 py-2">Statut</th>
-						<th class="px-1 py-2">Stock</th>
-						<th class="px-1 py-2">Date d'ajout</th>
-						<th class="px-1 py-2">Actions</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+						<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
 					</tr>
 				</thead>
-				<tbody>
-					<!-- Creation des produits par tour de boucle -->
-					{% if products is defined and products|length > 0 %}
+				<tbody class="bg-white divide-y divide-gray-200">
+					{% if products is defined and products is not empty %}
 						{% for product in products %}
-							<tr
-								class="border-b hover:bg-gray-50">
-								{# image 1 #}
-								<td class="px-1 py-1 text-center">
-									<img src="{{ asset('uploads/products/' ~ product.image) }}" alt="{{ product.nom }}" class="w-12 h-12 object-cover rounded mx-auto"/>
+							<tr class="hover:bg-gray-50">
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.id }}</td>
+								<td class="px-6 py-4 whitespace-nowrap">
+									<div class="flex-shrink-0 h-10 w-10">
+										{% if product.image is defined and product.image is not empty %}
+											<img class="h-10 w-10 rounded-full object-cover" src="{{ asset('uploads/products/' ~ product.image) }}" alt="{{ product.nom }}">
+										{% else %}
+											<div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+												<i class="bi bi-image text-gray-400"></i>
+											</div>
+										{% endif %}
+									</div>
 								</td>
-								{# image 2 #}
-								<td class="px-1 py-1 text-center">
-									{% if product.additionalImages is defined and product.additionalImages|length > 0 %}
-										<img src="{{ asset('uploads/products/' ~ product.additionalImages[0]) }}" alt="{{ product.nom }}" class="w-12 h-12 object-cover rounded mx-auto"/>
+								<td class="px-6 py-4 whitespace-nowrap">
+									<div class="text-sm font-medium text-gray-900">{{ product.nom }}</div>
+									<div class="text-xs text-gray-500">Réf: {{ product.id }}</div>
+								</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+									{{ product.categorie.nom|default('Non catégorisé') }}
+								</td>
+								<td class="px-6 py-4 whitespace-nowrap">
+									<div class="text-sm text-gray-900">{{ product.prix|format_currency('EUR', {fraction_digit: 2}) }}</div>
+								</td>
+								<td class="px-6 py-4 whitespace-nowrap">
+									{% if product.stock > 10 %}
+										<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+											{{ product.stock }}
+										</span>
+									{% elseif product.stock > 0 %}
+										<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+											{{ product.stock }}
+										</span>
 									{% else %}
-										<span class="text-gray-400">Aucune</span>
+										<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+											En rupture
+										</span>
 									{% endif %}
 								</td>
-								{# image 3 #}
-								<td class="px-1 py-1 text-center">
-									{% if product.additionalImages is defined and product.additionalImages|length > 1 %}
-										<img src="{{ asset('uploads/products/' ~ product.additionalImages[1]) }}" alt="{{ product.nom }}" class="w-12 h-12 object-cover rounded mx-auto"/>
+								<td class="px-6 py-4 whitespace-nowrap">
+									{% if product.active %}
+										<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Actif</span>
 									{% else %}
-										<span class="text-gray-400">Aucune</span>
+										<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Inactif</span>
 									{% endif %}
 								</td>
-
-
-								<td class="px-1 py-2 text-danger">{{ product.id }}</td>
-								<td class="px-1 py-2 font-medium">{{ product.nom }}</td>
-								<td class="px-1 py-2">{{ product.categorie.nom }}</td>
-								<td class="px-1 py-2">
-									{% if product.description is defined and product.description is not null %}
-										{{ product.description|u.truncate(30, '...') }}
-									{% else %}
-										<span class="text-gray-400">Aucune description</span>
-									{% endif %}
-								</td>
-								<td class="px-1 py-2">{{ product.materiaux }}</td>
-								<td class="px-1 py-2">{{ product.taille }}</td>
-								<td class="px-1 py-2">{{ product.poids }}
-									g</td>
-								<td class="px-1 py-2">{{ product.prix }}
-									€</td>
-								<td class="px-1 py-2">
-									{% if product.stock > 0 %}
-										<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">En stock</span>
-									{% else %}
-										<span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Épuisé</span>
-									{% endif %}
-								</td>
-								<td class="px-1 py-2">{{ product.stock }}</td>
-								<td class="px-1 py-2">{{ product.dateAjout|date('d/m/Y') }}</td>
-
-								{# Dans la colonne actions du tableau des produits #}
-								<td class="px-1 py-2">
-									<div class="flex space-x-2">
-										<a href="{{ path('app_admin_products_edit', {'id': product.id}) }}" class="text-blue-600 hover:text-blue-800">
-											<i class="bi bi-pencil"></i>
+								<td class="px-6 py-4 whitespace-nowrap text-center">
+									<div class="flex justify-center space-x-2">
+										<a href="#" class="text-blue-600 hover:text-blue-900">
+											<i class="bi bi-eye" title="Voir"></i>
 										</a>
-
-										<button type="button" class="text-red-600 hover:text-red-800 delete-product-btn" data-product-id="{{ product.id }}" data-product-name="{{ product.nom }}">
-											<i class="bi bi-trash"></i>
+										<button class="edit-product-btn text-amber-600 hover:text-amber-900" 
+                                               data-product-id="{{ product.id }}" 
+                                               data-product-name="{{ product.nom }}" 
+                                               data-product-description="{{ product.description }}" 
+                                               data-product-category="{{ product.categorie.id|default('') }}"
+                                               data-product-materiaux="{{ product.materiaux }}"
+                                               data-product-taille="{{ product.taille }}"
+                                               data-product-poids="{{ product.poids }}"
+                                               data-product-prix="{{ product.prix }}"
+                                               data-product-stock="{{ product.stock }}"
+                                               data-product-image="{{ product.image }}"
+                                               data-product-additional-images="{{ product.additionalImages|json_encode }}"
+                                               data-product-active="{{ product.active }}">
+											<i class="bi bi-pencil" title="Modifier"></i>
+										</button>
+										<button class="delete-product-btn text-red-600 hover:text-red-900" data-product-id="{{ product.id }}" data-product-name="{{ product.nom }}">
+											<i class="bi bi-trash" title="Supprimer"></i>
 										</button>
 									</div>
 								</td>
 							</tr>
 						{% endfor %}
+					{% else %}
+						<tr>
+							<td colspan="8" class="px-6 py-4 text-center text-gray-500">Aucun produit trouvé</td>
+						</tr>
 					{% endif %}
 				</tbody>
 			</table>
-
-			{# Pagination du tableau #}
-			<div class="flex justify-between items-center border-t p-4 bg-gray-50">
-				<div class="text-sm text-gray-600">Affichage de 1 à 10 sur 50 produits</div>
-				<div class="flex space-x-2">
-					<button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Précédent</button>
-					<button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Suivant</button>
-				</div>
-			</div>
 		</div>
 
 		<!-- Modale d'ajout de produit -->
@@ -233,7 +201,12 @@
 							{{ form_widget(formProduct.stock, {'attr': {'class': 'w-full px-3 py-2 border rounded', 'id': 'newProductStock', 'min': 0 , 'placeholder': 'Insérer le stock actuel'}}) }}
 							{{ form_errors(formProduct.stock) }}
 						</div>
-
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">État du produit</label>
+							{{ form_widget(formProduct.active, {'attr': {'class': 'mt-1', 'id': 'newProductActive'}}) }}
+							{{ form_errors(formProduct.active) }}
+						</div>
 
 						{# Date d ajout en masque #}
 						<div class="hidden">
@@ -254,12 +227,114 @@
 
 						{{ form_end(formProduct) }}
 					</div>
-				</div>
+				</div>		</div>
+	</div>
+	
+	<!-- Modale d'édition de produit -->
+	<div id="editProductModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-50">
+		<div class="bg-white rounded-lg shadow-lg w-4/5 h-4/5 mx-auto overflow-auto">
+			<div class="sticky top-0 bg-white border-b px-6 py-3 flex justify-between items-center">
+				<h3 class="text-xl font-semibold">Modifier le produit</h3>
+				<button id="closeEditModal" class="text-gray-500 hover:text-gray-700">
+					<i class="bi bi-x-lg"></i>
+				</button>
+			</div>
+			<div class="p-6">
+				<form id="editProductForm" method="POST">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+						<div class="col-span-1 md:col-span-2">
+							<div class="mb-4 flex items-center">
+								<div class="mr-4">
+									<img id="previewImage" src="" alt="Image du produit" class="w-24 h-24 object-cover rounded">
+								</div>
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Image principale</label>
+									<input type="file" name="product_image" class="w-full text-sm" accept="image/*" id="productImage">
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-span-1 md:col-span-2">
+							<label class="block text-sm font-medium text-gray-700 mb-1">Images additionnelles</label>
+							<div id="additionalImagesPreview" class="flex space-x-2 mb-2"></div>
+							<input type="file" name="product_additional_images[]" class="w-full text-sm" accept="image/*" multiple id="productAdditionalImages">
+							<small class="text-gray-500">Vous pouvez sélectionner jusqu'à 2 images additionnelles en même temps</small>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+							<input type="text" name="product[nom]" class="w-full px-3 py-2 border rounded" id="productName">
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+							<select name="product[categorie]" class="w-full px-3 py-2 border rounded" id="productCategory">
+								{% for category in categories %}
+									<option value="{{ category.id }}">{{ category.nom }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						
+						<div class="col-span-1 md:col-span-2">
+							<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+							<textarea name="product[description]" rows="4" class="w-full px-3 py-2 border rounded" id="productDescription"></textarea>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Matière</label>
+							<input type="text" name="product[materiaux]" class="w-full px-3 py-2 border rounded" id="productMaterial">
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Taille</label>
+							<input type="text" name="product[taille]" class="w-full px-3 py-2 border rounded" id="productSize">
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Poids (Grammes)</label>
+							<input type="number" name="product[poids]" class="w-full px-3 py-2 border rounded" id="productWeight" min="0" step="0.01">
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+							<input type="number" name="product[prix]" class="w-full px-3 py-2 border rounded" id="productPrice" min="0" step="0.01">
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+							<input type="number" name="product[stock]" class="w-full px-3 py-2 border rounded" id="productStock" min="0">
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-1">État du produit</label>
+							<div class="mt-1">
+								<label class="inline-flex items-center mr-4">
+									<input type="radio" name="product[active]" value="1" checked class="form-radio">
+									<span class="ml-2">Actif</span>
+								</label>
+								<label class="inline-flex items-center">
+									<input type="radio" name="product[active]" value="0" class="form-radio">
+									<span class="ml-2">Inactif</span>
+								</label>
+							</div>
+						</div>
+					</div>
+					
+					<div class="flex justify-center space-x-3 border-t pt-4">
+						<button type="button" id="cancelEdit" class="px-4 py-2 border rounded hover:bg-gray-100">
+							Annuler
+						</button>
+						<button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700">
+							Enregistrer les modifications
+						</button>
+					</div>
+				</form>
 			</div>
 		</div>
+	</div>
 
-		<!-- Modale de suppression de produit -->
-		<div id="deleteProductModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-50">
+	<!-- Modale de suppression de produit -->
+	<div id="deleteProductModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-50">
 			<div class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
 				<div class="text-center">
 					<h3 class="text-xl font-semibold mb-4">Confirmer la suppression</h3>
@@ -287,6 +362,84 @@
 	{{ parent() }}
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
+    // Initialisation de DataTables pour le tableau des produits
+    let productsTable = $('#products-table').DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json',
+        },
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Tous"]],
+        dom: '<"top"lf>rt<"bottom"ip>',
+        columnDefs: [
+            { "ordertable": false, "targets": [1, 7] } // Désactive le tri sur les colonnes Image et Actions
+        ],
+        order: [[0, 'desc']], // Tri par défaut sur l'ID (descendant)
+        language: {
+            processing:     "Traitement en cours...",
+            search:         "Rechercher&nbsp;:",
+            lengthMenu:     "Afficher _MENU_ produits",
+            info:           "Affichage de _START_ à _END_ sur _TOTAL_ produits",
+            infoEmpty:      "Affichage de 0 à 0 sur 0 produit",
+            infoFiltered:   "(filtré de _MAX_ produits au total)",
+            infoPostFix:    "",
+            loadingRecords: "Chargement en cours...",
+            zeroRecords:    "Aucun produit à afficher",
+            emptyTable:     "Aucune donnée disponible",
+            paginate: {
+                first:      "Premier",
+                previous:   "Précédent",
+                next:       "Suivant",
+                last:       "Dernier"
+            },
+            aria: {
+                sortAscending:  ": activer pour trier la colonne par ordre croissant",
+                sortDescending: ": activer pour trier la colonne par ordre décroissant"
+            }
+        },
+        initComplete: function() {
+            // Ajout d'un filtre de catégorie personnalisé
+            this.api().columns(3).every(function() {
+                var column = this;
+                var select = $('<select class="ml-2 border rounded-lg px-2 py-1"><option value="">Toutes les catégories</option></select>')
+                    .appendTo($('.top'))
+                    .on('change', function() {
+                        var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                        column.search(val ? val : '', true, false).draw();
+                    });
+
+                // Collecte des valeurs uniques de catégorie
+                var categories = [];
+                column.nodes().each(function(cell) {
+                    var categoryText = $(cell).text().trim();
+                    if (!categories.includes(categoryText)) {
+                        categories.push(categoryText);
+                    }
+                });
+
+                // Ajout des options au select
+                categories.sort().forEach(function(category) {
+                    select.append('<option value="' + category + '">' + category + '</option>');
+                });
+            });
+
+            // Ajout d'un filtre de statut personnalisé
+            this.api().columns(6).every(function() {
+                var column = this;
+                var select = $('<select class="ml-2 border rounded-lg px-2 py-1"><option value="">Tous les statuts</option></select>')
+                    .appendTo($('.top'))
+                    .on('change', function() {
+                        var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                        column.search(val ? val : '', true, false).draw();
+                    });
+
+                // Ajout des options au select
+                select.append('<option value="Actif">Actif</option>');
+                select.append('<option value="Inactif">Inactif</option>');
+            });
+        }
+    });
+
     // Récupération des éléments de la modale d'édition
     const editModal = document.getElementById('editProductModal');
     const closeEditModal = document.getElementById('closeEditModal');
@@ -323,6 +476,18 @@
             document.getElementById('productWeight').value = this.getAttribute('data-product-poids');
             document.getElementById('productPrice').value = this.getAttribute('data-product-prix');
             document.getElementById('productStock').value = this.getAttribute('data-product-stock');
+            
+            // Définir l'état actif/inactif du produit
+            const isActive = this.getAttribute('data-product-active') === 'true';
+            const activeRadios = document.getElementsByName('product[active]');
+            if (activeRadios) {
+                for (let i = 0; i < activeRadios.length; i++) {
+                    if ((activeRadios[i].value === '1' && isActive) || 
+                        (activeRadios[i].value === '0' && !isActive)) {
+                        activeRadios[i].checked = true;
+                    }
+                }
+            }
             
             // Afficher l'image actuelle
             const productImage = this.getAttribute('data-product-image');

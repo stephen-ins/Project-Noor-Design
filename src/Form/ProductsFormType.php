@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Form;
+
 use App\Entity\Categories;
 use App\Entity\Products;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -154,6 +155,17 @@ class ProductsFormType extends AbstractType
                 'choice_label' => 'nom', // Utilisation du nom correct du champ dans Categories
                 'required' => true,
                 'placeholder' => 'Sélectionnez une catégorie',
+            ])
+
+            ->add('active', ChoiceType::class, [
+                'label' => 'État du produit',
+                'choices' => [
+                    'Actif' => true,
+                    'Inactif' => false,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'data' => true, // Par défaut à Actif
             ])
         ;
     }

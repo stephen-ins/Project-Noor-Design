@@ -54,6 +54,9 @@ class Products
     #[ORM\Column(options: ["default" => 0])]
     private int $nombreVentes = 0;
 
+    #[ORM\Column(options: ["default" => true])]
+    private bool $active = true;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -221,6 +224,23 @@ class Products
     public function setNombreVentes(int $nombreVentes): static
     {
         $this->nombreVentes = $nombreVentes;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function getActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): static
+    {
+        $this->active = $active;
 
         return $this;
     }
