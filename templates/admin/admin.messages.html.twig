@@ -32,7 +32,7 @@
                 <span class="text-blue-600">{{ unreadCount }} non lu(s)</span>
             </div>
 
-            <table class="min-w-full divide-y divide-gray-200">
+            <table id="messages-table" class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -89,4 +89,84 @@
         </div>
 	</main>
 
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Initialisation de DataTables pour le tableau des messages
+			let messagesTable = $('#messages-table').DataTable({
+				language: {
+					url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json',
+				},
+				responsive: true,
+				pageLength: 10,
+				lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Tous"]],
+				dom: '<"top"lf>rt<"bottom"ip>',
+				columnDefs: [
+					{ "ordertable": false, "targets": 4 } // Désactive le tri sur la colonne Actions
+				],
+				order: [[0, 'desc']], // Tri par défaut sur la date (descendant)
+				language: {
+					processing:     "Traitement en cours...",
+					search:         "Rechercher&nbsp;:",
+					lengthMenu:     "Afficher _MENU_ messages",
+					info:           "Affichage de _START_ à _END_ sur _TOTAL_ messages",
+					infoEmpty:      "Affichage de 0 à 0 sur 0 message",
+					infoFiltered:   "(filtré de _MAX_ messages au total)",
+					infoPostFix:    "",
+					loadingRecords: "Chargement en cours...",
+					zeroRecords:    "Aucun message à afficher",
+					emptyTable:     "Aucune donnée disponible",
+					paginate: {
+						first:      "Premier",
+						previous:   "Précédent",
+						next:       "Suivant",
+						last:       "Dernier"
+					},
+					aria: {
+						sortAscending:  ": activer pour trier la colonne par ordre croissant",
+						sortDescending: ": activer pour trier la colonne par ordre décroissant"
+					}
+				},
+				initComplete: function() {
+					// Ajout d'un filtre de statut personnalisé
+					this.api().columns(3).every(function() {
+						var column = this;
+						var select = $('<select class="ml-2 border rounded-lg px-2 py-1"><option value="">Tous les statuts</option></select>')
+							.appendTo($('.top'))
+							.on('change', function() {
+								var val = $.fn.dataTable.util.escapeRegex($(this).val());
+								column.search(val ? val : '', true, false).draw();
+							});
+
+						// Ajout des options au select
+						select.append('<option value="Lu">Lu</option>');
+						select.append('<option value="Non lu">Non lu</option>');
+					});
+
+					// Mise en évidence des messages non lus (déjà appliqué via les classes Twig)
+					// La classe est déjà ajoutée via: class="[TWIG: if not message.isRead]bg-blue-50 font-semibold[TWIG: endif]"
+				},
+				// Personnalisation des classes CSS pour préserver le style Tailwind
+				drawCallback: function() {
+					$('.dataTables_paginate .paginate_button').addClass('px-3 py-1 border rounded-md mx-1 cursor-pointer');
+					$('.dataTables_paginate .paginate_button.current').addClass('bg-blue-600 text-white border-blue-600');
+					$('.dataTables_paginate .paginate_button:not(.current)').addClass('text-gray-700 border-gray-300 hover:bg-gray-100');
+					$('.dataTables_length select').addClass('border rounded-md px-2 py-1 ml-1 mr-1');
+					$('.dataTables_filter input').addClass('border rounded-md px-2 py-1 ml-1');
+				}
+			});
+			
+			// Ajout d'une alerte de confirmation pour la suppression
+			document.querySelectorAll('a[onclick*="confirm"]').forEach(function(link) {
+				link.addEventListener('click', function(e) {
+					if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
+						e.preventDefault();
+					}
+				});
+			});
+		});
+	</script>
 {% endblock %}

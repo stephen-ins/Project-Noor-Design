@@ -13,10 +13,176 @@
 		<!-- Header -->
 		<div class="flex justify-between items-center border-b pb-4 mb-6">
 			<h1 class="text-2xl font-semibold">Gestion des Commentaires</h1>
-
 		</div>
 
+		<!-- Messages flash -->
+		{% for label, messages in app.flashes %}
+			{% for message in messages %}
+				<div class="mb-4 px-4 py-3 rounded-lg {% if label == 'success' %}bg-green-100 text-green-800{% elseif label == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+					{{ message }}
+				</div>
+			{% endfor %}
+		{% endfor %}
 
+		<!-- Tableau des commentaires -->
+		<div class="bg-white rounded-lg shadow overflow-hidden">
+			<div class="overflow-x-auto">
+				<table id="comments-table" class="min-w-full divide-y divide-gray-200">
+					<thead class="bg-gray-50">
+						<tr>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commentaire</th>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+							<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+						</tr>
+					</thead>
+					<tbody class="bg-white divide-y divide-gray-200">
+						{% if comments is defined and comments is not empty %}
+							{% for comment in comments %}
+								<tr class="hover:bg-gray-50">
+									<td class="px-6 py-4 whitespace-nowrap">
+										<div class="text-sm font-medium text-gray-900">{{ comment.product.nom }}</div>
+										<div class="text-xs text-gray-500">Réf:
+											{{ comment.product.id }}</div>
+									</td>
+									<td class="px-6 py-4 whitespace-nowrap">
+										<div class="text-sm">{{ comment.user.prenom }}
+											{{ comment.user.nom }}</div>
+										<div class="text-xs text-gray-500">{{ comment.user.email }}</div>
+									</td>
+									<td class="px-6 py-4 whitespace-nowrap">
+										<div class="flex items-center">
+											{% for i in 1..5 %}
+												<i class="bi {% if i <= comment.rating %}bi-star-fill text-amber-400{% else %}bi-star text-gray-300{% endif %}"></i>
+											{% endfor %}
+											<span class="ml-1 text-sm text-gray-600">{{ comment.rating }}/5</span>
+										</div>
+									</td>
+									<td class="px-6 py-4">
+										<div class="text-sm text-gray-900 max-w-xs truncate">
+											{{ comment.content }}
+										</div>
+									</td>
+									<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+										{{ comment.createdAt|date('d/m/Y') }}
+									</td>
+									<td class="px-6 py-4 whitespace-nowrap">
+										{% if comment.approved %}
+											<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approuvé</span>
+										{% else %}
+											<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">En attente</span>
+										{% endif %}
+									</td>
+									<td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+										<div class="flex justify-center space-x-2">
+											<button class="text-blue-600 hover:text-blue-900" title="Voir détails">
+												<i class="bi bi-eye"></i>
+											</button>
+											{% if not comment.approved %}
+												<button class="text-green-600 hover:text-green-900" title="Approuver">
+													<i class="bi bi-check-lg"></i>
+												</button>
+											{% endif %}
+											<button class="text-red-600 hover:text-red-900" title="Supprimer">
+												<i class="bi bi-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+						{% else %}
+							<tr>
+								<td colspan="7" class="px-6 py-4 text-center text-gray-500">Aucun commentaire trouvé</td>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</main>
 
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () { // Initialisation de DataTables pour le tableau des commentaires
+let commentsTable = $('#comments-table').DataTable({
+language: {
+url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json'
+},
+responsive: true,
+pageLength: 10,
+lengthMenu: [
+[
+5,
+10,
+25,
+50,
+-1
+],
+[
+5,
+10,
+25,
+50,
+"Tous"
+]
+],
+dom: '<"top"lf>rt<"bottom"ip>',
+columnDefs: [
+{
+"ordertable": false,
+"targets": [3, 6]
+} // Désactive le tri sur les colonnes Commentaire et Actions
+],
+order: [
+[4, 'desc']
+], // Tri par défaut sur la date (descendant)
+language: {
+processing: "Traitement en cours...",
+search: "Rechercher&nbsp;:",
+lengthMenu: "Afficher _MENU_ commentaires",
+info: "Affichage de _START_ à _END_ sur _TOTAL_ commentaires",
+infoEmpty: "Affichage de 0 à 0 sur 0 commentaire",
+infoFiltered: "(filtré de _MAX_ commentaires au total)",
+infoPostFix: "",
+loadingRecords: "Chargement en cours...",
+zeroRecords: "Aucun commentaire à afficher",
+emptyTable: "Aucune donnée disponible",
+paginate: {
+first: "Premier",
+previous: "Précédent",
+next: "Suivant",
+last: "Dernier"
+},
+aria: {
+sortAscending: ": activer pour trier la colonne par ordre croissant",
+sortDescending: ": activer pour trier la colonne par ordre décroissant"
+}
+},
+initComplete: function () { // Ajout d'un filtre de statut personnalisé
+this.api().columns(5).every(function () {
+var column = this;
+var select = $('<select class="ml-2 border rounded-lg px-2 py-1"><option value="">Tous les statuts</option></select>').appendTo($('.top')).on('change', function () {
+var val = $.fn.dataTable.util.escapeRegex($(this).val());
+column.search(val ? val : '', true, false).draw();
+});
+
+// Ajout des options au select
+select.append('<option value="Approuvé">Approuvés</option>');
+select.append('<option value="En attente">En attente</option>');
+});
+}
+});
+
+// Synchronisation de la recherche personnalisée
+$('#search-comments').on('keyup', function () {
+commentsTable.search(this.value).draw();
+});
+});
+	</script>
 {% endblock %}
